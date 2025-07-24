@@ -1,0 +1,22 @@
+{
+  "name": "Hungry Pigeon - Don't Let the Pigeon Win!",
+  "short_name": "Hungry Pigeon",
+  "description": "Tap corn kernels to make popcorn before the pigeon gets them!",
+  "start_url": "/index.html",
+  "display": "fullscreen",
+  "orientation": "portrait",
+  "background_color": "#87CEEB",
+  "theme_color": "#FF6B6B",
+  "icons": [
+    {
+      "src": "assets/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

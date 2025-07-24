@@ -1,0 +1,2154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <!-- PWA Support -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Hungry Pigeon">
+    <link rel="apple-touch-icon" href="assets/icons/icon-192x192.png">
+    <!-- Theme colors -->
+    <meta name="theme-color" content="#FF6B6B">
+
+    <title>Hungry Pigeon - Don't Let the Pigeon Win!</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: linear-gradient(to bottom, #87CEEB 0%, #98D8E8 100%);
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
+
+        #gameContainer {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #gameCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Background Image Placeholder */
+        .screen {
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        /* Splash Screen Background */
+        #splashScreen {
+            background-image: url('assets/images/backgrounds/splash_screen_landscape.png');
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-color: #87CEEB;
+        }
+
+        /* Game UI */
+        #gameUI {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        
+        #gameUI > * {
+            pointer-events: auto;
+        }
+
+        /* Score Board with animation */
+        #scoreBoard {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            font-weight: bold;
+            pointer-events: none;
+            transition: transform 0.3s ease;
+        }
+
+        #scoreBoard.score-bump {
+            animation: scoreBump 0.3s ease-out;
+        }
+
+        @keyframes scoreBump {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        /* Timer with pulse animation */
+        #timer {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            transition: all 0.3s ease;
+        }
+
+        #timer.urgent {
+            animation: timerPulse 1s ease-in-out infinite;
+            background: rgba(255, 255, 255, 0.95);
+            color: #FF0000;
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+            font-weight: bold;
+            border: 2px solid #FF0000;
+        }
+
+        @keyframes timerPulse {
+            0%, 100% { 
+                transform: scale(1); 
+                box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+            }
+            50% { 
+                transform: scale(1.1); 
+                box-shadow: 0 0 30px rgba(255, 0, 0, 0.8);
+            }
+        }
+
+        /* Popcorn Bucket Placeholder */
+        #popcornBag {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            width: 120px;
+            height: 120px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            z-index: 15;
+            transition: transform 0.3s ease;
+        }
+
+        #popcornBag.bucket-bounce {
+            animation: bucketBounce 0.5s ease-out;
+        }
+
+        @keyframes bucketBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .popcorn-collect {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            pointer-events: none;
+            z-index: 20;
+            transition: all 0.8s ease-out;
+        }
+
+        /* Menu Screens */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(to bottom, #87CEEB 0%, #98D8E8 100%);
+            z-index: 100;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        h1 {
+            font-size: 48px;
+            color: #333;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Loading GIF Placeholder */
+        .loading-gif {
+            width: 150px;
+            height: 150px;
+            background-image: url('assets/images/pigeon/Pigeon_Hit.gif');
+            background-size: contain;
+            background-repeat: no-repeat;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .btn {
+            background: #FF6B6B;
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            font-size: 24px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #CC5555, 0 8px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.1s ease;
+            margin: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            pointer-events: auto;
+        }
+
+        .btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #CC5555, 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:hover {
+            background: #FF5252;
+        }
+
+        .btn-secondary {
+            background: #4ECDC4;
+            box-shadow: 0 6px 0 #3BABA3, 0 8px 10px rgba(0, 0, 0, 0.2);
+            font-size: 20px;
+        }
+
+        .btn-secondary:active {
+            box-shadow: 0 2px 0 #3BABA3, 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: #3BABA3;
+        }
+
+        #gameOverScreen h2 {
+            font-size: 36px;
+            color: #333;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .score-display {
+            font-size: 28px;
+            margin: 10px 0;
+            color: #333;
+            text-align: center;
+        }
+
+        .score-display > div {
+            margin: 5px 0;
+        }
+
+        #highScore {
+            color: #FF6B6B;
+            font-size: 20px;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        #resultMessage {
+            text-align: center;
+        }
+
+        .new-high-score {
+            animation: pulse 1s ease-in-out infinite;
+            color: #FFD700 !important;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* Funnel/Dispenser with animation */
+        #kernelDispenser {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 240px;
+            background-image: url('assets/images/ui/funnel_animated.gif');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            z-index: 20;
+        }
+
+        /* Pigeon Character - Enhanced with animation */
+        #pigeon {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            width: 90px;
+            height: 90px;
+            background-image: url('assets/images/pigeon/Pigeon_Right.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            z-index: 10;
+            transition: transform 0.3s ease;
+        }
+
+        #pigeon.walking {
+            animation: pigeonBob 0.3s ease-in-out infinite;
+        }
+
+        @keyframes pigeonBob {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
+
+        #pigeon.facing-left {
+            background-image: url('assets/images/pigeon/Pigeon_Left.png');
+        }
+
+        #pigeon.eating-right {
+            background-image: url('assets/images/pigeon/Pigeon_Right_Eating.png');
+            animation: pigeonEat 0.3s ease-in-out;
+        }
+
+        #pigeon.eating-left {
+            background-image: url('assets/images/pigeon/Pigeon_Left_Eating.png');
+            animation: pigeonEat 0.3s ease-in-out;
+        }
+
+        @keyframes pigeonEat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        #pigeon.angry {
+            background-image: url('assets/images/pigeon/Pigeon_Angry.png');
+        }
+
+        #pigeon.win {
+            background-image: url('assets/images/pigeon/Pigeon_Win.gif');
+        }
+
+        #pigeon.victory-dance {
+            animation: victoryDance 1s ease-in-out infinite;
+        }
+
+        @keyframes victoryDance {
+            0%, 100% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(-10deg) scale(1.1); }
+            75% { transform: rotate(10deg) scale(1.1); }
+        }
+
+        /* Ground/Floor */
+        #ground {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 80px;
+            background: linear-gradient(to bottom, #8B7355 0%, #6B5637 100%);
+            border-top: 3px solid #5C4A3A;
+        }
+
+        /* Enhanced Kernel with rotation and shadow */
+        .kernel {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            cursor: pointer;
+            transition: transform 0.1s ease;
+            filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.2));
+            animation: kernelRotate 4s linear infinite;
+        }
+
+        @keyframes kernelRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .kernel:hover {
+            transform: scale(1.2);
+            animation-play-state: paused;
+        }
+
+        .kernel-shadow {
+            position: absolute;
+            width: 20px;
+            height: 10px;
+            background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.3) 0%, transparent 70%);
+            bottom: -5px;
+            left: 5px;
+            z-index: -1;
+        }
+
+        /* Enhanced Popcorn Pop */
+        .popcorn-pop {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            pointer-events: none;
+            animation: pop 0.5s ease-out forwards;
+        }
+
+        @keyframes pop {
+            0% {
+                transform: scale(0) rotate(0deg);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.5) rotate(180deg);
+            }
+            100% {
+                transform: scale(1) rotate(360deg) translateY(-30px);
+                opacity: 0;
+            }
+        }
+
+        /* Pop particles */
+        .pop-particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #FFD700;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: particleFly 0.6s ease-out forwards;
+        }
+
+        @keyframes particleFly {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+            }
+        }
+
+        /* Score popup */
+        .score-popup {
+            position: absolute;
+            font-size: 24px;
+            font-weight: bold;
+            color: #FFD700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            pointer-events: none;
+            z-index: 100;
+            animation: scoreFloat 1s ease-out forwards;
+        }
+
+        @keyframes scoreFloat {
+            0% {
+                transform: translateY(0) scale(0.5);
+                opacity: 0;
+            }
+            50% {
+                transform: translateY(-20px) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-50px) scale(0.8);
+                opacity: 0;
+            }
+        }
+
+        /* Combo counter */
+        #comboDisplay {
+            position: absolute;
+            top: 140px;
+            left: 20px;
+            background: rgba(255, 215, 0, 0.9);
+            padding: 10px 20px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 20px;
+            color: #333;
+            display: none;
+            animation: comboAppear 0.3s ease-out;
+        }
+
+        @keyframes comboAppear {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
+        }
+
+        /* Instructions */
+        .instructions {
+            text-align: center;
+            color: #666;
+            margin: 20px 0;
+            font-size: 18px;
+            max-width: 300px;
+        }
+
+        /* Round counter */
+        #roundDisplay {
+            position: absolute;
+            top: 80px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-weight: bold;
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* Countdown Screen */
+        #countdownScreen {
+            background: linear-gradient(to bottom, #FFE4B5 0%, #FFD700 100%);
+        }
+
+        .countdown-number {
+            font-size: 120px;
+            font-weight: bold;
+            color: #FF6B6B;
+            text-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
+            animation: countdownPulse 1s ease-out;
+        }
+
+        @keyframes countdownPulse {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .countdown-message {
+            font-size: 28px;
+            color: #333;
+            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        /* Power-ups Display */
+        #powerUpsDisplay {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            pointer-events: auto;
+            z-index: 50;
+        }
+
+        .powerup-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease;
+            position: relative;
+            pointer-events: auto;
+        }
+
+        .powerup-icon:hover {
+            transform: scale(1.1);
+        }
+
+        .powerup-icon.active {
+            background: #FFD700;
+            animation: powerupActive 0.5s ease-in-out infinite;
+        }
+
+        .powerup-icon.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .powerup-count {
+            position: absolute;
+            bottom: -5px;
+            right: -5px;
+            background: #FF6B6B;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        @keyframes powerupActive {
+            0%, 100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+        }
+
+        /* Slow Motion Effect */
+        .slow-motion-active {
+            animation: slowMotionPulse 0.5s ease-in-out infinite;
+        }
+
+        @keyframes slowMotionPulse {
+            0%, 100% { 
+                filter: hue-rotate(0deg) brightness(1);
+                background: linear-gradient(to bottom, rgba(135, 206, 235, 0.9) 0%, rgba(152, 216, 232, 0.9) 100%);
+            }
+            50% { 
+                filter: hue-rotate(30deg) brightness(1.1);
+                background: linear-gradient(to bottom, rgba(135, 206, 235, 0.95) 0%, rgba(152, 216, 232, 0.95) 100%);
+            }
+        }
+
+        /* Freeze effect overlay */
+        .freeze-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 90;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .freeze-overlay.active {
+            opacity: 1;
+            background: radial-gradient(ellipse at center, transparent 0%, rgba(180, 220, 255, 0.3) 100%);
+        }
+
+        /* Ice crystal particles */
+        .ice-particle {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23B0E0FF"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.56 5.82 22 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>');
+            background-size: contain;
+            pointer-events: none;
+            animation: iceFall 3s linear infinite;
+        }
+
+        @keyframes iceFall {
+            0% {
+                transform: translateY(-20px) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Mobile optimization */
+        @media (max-width: 600px) {
+            h1 { font-size: 36px; }
+            .btn { 
+                padding: 15px 30px; 
+                font-size: 20px;
+            }
+            #scoreBoard { 
+                font-size: 14px;
+                padding: 10px 15px;
+            }
+            #timer { font-size: 20px; }
+            .countdown-number { font-size: 80px; }
+            .countdown-message { font-size: 22px; }
+        }
+
+        /* Settings Button */
+        #settingsButton {
+            position: fixed;
+            top: 140px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 28px;
+            z-index: 1000;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease;
+            display: none;
+        }
+
+        #settingsButton.visible {
+            display: flex;
+        }
+
+        #settingsButton:hover {
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 1);
+        }
+
+        /* Settings Menu */
+        #settingsMenu {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            z-index: 2000;
+            min-width: 300px;
+        }
+
+        #settingsMenu h3 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: #333;
+            text-align: center;
+            font-size: 24px;
+        }
+
+        .settings-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 15px 0;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .settings-item:last-child {
+            border-bottom: none;
+        }
+
+        .settings-label {
+            font-size: 18px;
+            color: #333;
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: #ccc;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .toggle-switch.active {
+            background: #4ECDC4;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+
+        .toggle-switch.active .toggle-slider {
+            transform: translateX(30px);
+        }
+
+        /* Settings Overlay */
+        #settingsOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1999;
+        }
+
+        .close-settings {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 30px;
+            height: 30px;
+            background: #FF6B6B;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Share Button Update */
+        .share-button {
+            background: #4ECDC4;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #3BABA3, 0 8px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.1s ease;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .share-button:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #3BABA3, 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Screen shake effect */
+        @keyframes screenShake {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(-5px, 5px); }
+            50% { transform: translate(5px, -5px); }
+            75% { transform: translate(-5px, -5px); }
+        }
+
+        .shake {
+            animation: screenShake 0.3s ease-in-out;
+        }
+
+        /* Dust cloud effect */
+        .dust-cloud {
+            position: absolute;
+            width: 40px;
+            height: 20px;
+            background: radial-gradient(ellipse at center, rgba(139, 115, 85, 0.4) 0%, transparent 70%);
+            pointer-events: none;
+            animation: dustPuff 0.5s ease-out forwards;
+        }
+
+        @keyframes dustPuff {
+            0% {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <canvas id="gameCanvas"></canvas>
+        
+        <!-- Freeze overlay effect -->
+        <div id="freezeOverlay" class="freeze-overlay"></div>
+        
+        <!-- Settings Button (visible on all screens) -->
+        <div id="settingsButton">⚙️</div>
+        
+        <!-- Settings Menu (hidden by default) -->
+        <div id="settingsOverlay" class="hidden"></div>
+        <div id="settingsMenu" class="hidden">
+            <button class="close-settings">×</button>
+            <h3>Settings</h3>
+            <div class="settings-item">
+                <span class="settings-label">Sound Effects</span>
+                <div class="toggle-switch active" id="soundEffectsToggle">
+                    <div class="toggle-slider"></div>
+                </div>
+            </div>
+            <div class="settings-item">
+                <span class="settings-label">Background Music</span>
+                <div class="toggle-switch active" id="musicToggle">
+                    <div class="toggle-slider"></div>
+                </div>
+            </div>
+            <div class="settings-item">
+                <span class="settings-label">Vibration</span>
+                <div class="toggle-switch active" id="vibrationToggle">
+                    <div class="toggle-slider"></div>
+                </div>
+            </div>
+            <div class="settings-item">
+                <span class="settings-label">Show FPS</span>
+                <div class="toggle-switch" id="fpsToggle">
+                    <div class="toggle-slider"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Game UI -->
+        <div id="gameUI" class="hidden">
+            <div id="kernelDispenser"></div>
+            <div id="scoreBoard">
+                <div>You: <span id="playerScore">0</span></div>
+                <div>Pigeon: <span id="pigeonScore">0</span></div>
+            </div>
+            <div id="timer">30</div>
+            <div id="roundDisplay">Round <span id="currentRound">1</span></div>
+            <div id="comboDisplay">Combo x<span id="comboCount">2</span></div>
+            <div id="popcornBag"></div>
+            <div id="powerUpsDisplay">
+                <div class="powerup-icon" id="slowMotionPower" data-type="slowMotion">
+                    ⏱️
+                    <span class="powerup-count">0</span>
+                </div>
+                <div class="powerup-icon" id="multiPopPower" data-type="multiPop">
+                    💥
+                    <span class="powerup-count">0</span>
+                </div>
+                <div class="powerup-icon" id="freezePower" data-type="freeze">
+                    ❄️
+                    <span class="powerup-count">0</span>
+                </div>
+            </div>
+            <div id="ground"></div>
+            <div id="pigeon"></div>
+        </div>
+
+        <!-- Splash Screen -->
+        <div id="splashScreen" class="screen">
+        </div>
+
+        <!-- Main Menu -->
+        <div id="mainMenu" class="screen hidden">
+            <div class="loading-gif"></div>
+            <h1>Hungry Pigeon</h1>
+            <p class="instructions">
+                Tap the corn kernels to make popcorn!<br>
+                Don't let the pigeon get them first!
+            </p>
+            <button class="btn" id="playButton">PLAY</button>
+            <div id="menuHighScore" class="hidden">
+                Best Score: <span id="bestScore">0</span> 🍿
+            </div>
+        </div>
+
+        <!-- Countdown Screen -->
+        <div id="countdownScreen" class="screen hidden">
+            <div style="font-size: 24px; color: #666; margin-bottom: 20px;">Round <span id="countdownRound">1</span></div>
+            <div id="countdownPigeon" style="width: 150px; height: 150px; background-image: url('assets/images/pigeon/Pigeon_Hit.png'); background-size: contain; background-repeat: no-repeat;"></div>
+            <div class="countdown-number" id="countdownNumber">3</div>
+            <div class="countdown-message" id="countdownMessage">The pigeon is hungry</div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="gameOverScreen" class="screen hidden">
+            <div id="resultPigeon" style="width: 250px; height: 250px; background-size: contain; background-repeat: no-repeat; margin: 0 auto 20px auto;"></div>
+            <h2 id="gameOverTitle">Game Over!</h2>
+            <div class="score-display">
+                <div>You: <span id="finalPlayerScore">0</span></div>
+                <div>Pigeon: <span id="finalPigeonScore">0</span></div>
+            </div>
+            <div id="resultMessage"></div>
+            <div id="highScore"></div>
+            <div style="display: flex; gap: 15px; margin-top: 20px; justify-content: center; flex-wrap: wrap;">
+                <button class="btn" id="playAgainButton">PLAY AGAIN</button>
+                <button class="btn btn-secondary" id="watchAdButton">WATCH AD FOR POWER-UPS</button>
+            </div>
+            <button class="share-button" onclick="shareScore()" style="margin-top: 15px;">
+                <span>📤</span> Share Score
+            </button>
+        </div>
+    </div>
+
+    <!-- Audio Elements -->
+    <audio id="startSound" src="assets/sounds/effects/pigeon_start.wav"></audio>
+    <audio id="knockSound" src="assets/sounds/effects/knock_knock.wav"></audio>
+    <audio id="backgroundMusic" src="assets/sounds/music/background_music.wav" loop></audio>
+    <audio id="machineSound" src="assets/sounds/effects/machine.wav" loop></audio>
+    <audio id="pigeonCooSound" src="assets/sounds/effects/pigeon_coocoo_short.wav"></audio>
+    <audio id="pigeonLoseSound" src="assets/sounds/effects/pigeon_lose.wav"></audio>
+    <audio id="pigeonWinSound" src="assets/sounds/effects/pigeon_win.wav"></audio>
+    <audio id="timeUpSound" src="assets/sounds/effects/time_up.wav"></audio>
+    
+    <!-- Multiple pop sounds -->
+    <audio id="popSound1" src="assets/sounds/effects/pop_01.wav"></audio>
+    <audio id="popSound2" src="assets/sounds/effects/pop_02.wav"></audio>
+    <audio id="popSound3" src="assets/sounds/effects/pop_03.wav"></audio>
+    <audio id="popSound4" src="assets/sounds/effects/pop_04.wav"></audio>
+    <audio id="popSound5" src="assets/sounds/effects/pop_05.wav"></audio>
+    <audio id="popSound6" src="assets/sounds/effects/pop_06.wav"></audio>
+    <audio id="popSound7" src="assets/sounds/effects/pop_07.wav"></audio>
+    <audio id="popSound8" src="assets/sounds/effects/pop_08.wav"></audio>
+    <audio id="popSound9" src="assets/sounds/effects/pop_09.wav"></audio>
+    <audio id="popSound10" src="assets/sounds/effects/pop_10.wav"></audio>
+    <audio id="popSound11" src="assets/sounds/effects/pop_11.wav"></audio>
+    <audio id="popSound12" src="assets/sounds/effects/pop_12.wav"></audio>
+
+    <script>
+        // Game State
+        const gameState = {
+            playing: false,
+            paused: false,
+            playerScore: 0,
+            pigeonScore: 0,
+            timeLeft: 30,
+            round: 1,
+            kernels: [],
+            fallenKernels: [],
+            highScore: 0,
+            baseSpeed: 2,
+            speedMultiplier: 1,
+            pigeonX: window.innerWidth / 2,
+            pigeonSpeed: 5,
+            pigeonFacingRight: true,
+            pigeonMoving: false,
+            pendingFallenKernels: [],
+            lastCooTime: 0,
+            combo: 0,
+            lastPopTime: 0,
+            comboTimeout: null,
+            // Settings
+            soundEffectsEnabled: true,
+            musicEnabled: true,
+            vibrationEnabled: true,
+            showFPS: false,
+            powerUps: {
+                slowMotion: 0,
+                multiPop: 0,
+                freeze: 0
+            },
+            activePowerUps: {
+                slowMotion: false,
+                freeze: false,
+                multiPop: false
+            }
+        };
+
+        // Image arrays for random selection
+        const kernelImages = [
+            'assets/images/kernels/kernel_1.png',
+            'assets/images/kernels/kernel_2.png',
+            'assets/images/kernels/kernel_3.png',
+            'assets/images/kernels/kernel_4.png',
+            'assets/images/kernels/kernel_5.png',
+            'assets/images/kernels/kernel_6.png',
+            'assets/images/kernels/kernel_7.png',
+            'assets/images/kernels/kernel_8.png',
+            'assets/images/kernels/kernel_9.png'
+        ];
+
+        const popcornImages = [
+            'assets/images/popcorn/Popcorn_01.png',
+            'assets/images/popcorn/Popcorn_02.png',
+            'assets/images/popcorn/Popcorn_03.png',
+            'assets/images/popcorn/Popcorn_04.png',
+            'assets/images/popcorn/Popcorn_05.png',
+            'assets/images/popcorn/Popcorn_06.png',
+            'assets/images/popcorn/Popcorn_07.png',
+            'assets/images/popcorn/Popcorn_08.png',
+            'assets/images/popcorn/Popcorn_09.png'
+        ];
+
+        const popSounds = [
+            'popSound1', 'popSound2', 'popSound3', 'popSound4',
+            'popSound5', 'popSound6', 'popSound7', 'popSound8',
+            'popSound9', 'popSound10', 'popSound11', 'popSound12'
+        ];
+
+        // Game Elements
+        const elements = {
+            gameUI: document.getElementById('gameUI'),
+            splashScreen: document.getElementById('splashScreen'),
+            mainMenu: document.getElementById('mainMenu'),
+            countdownScreen: document.getElementById('countdownScreen'),
+            gameOverScreen: document.getElementById('gameOverScreen'),
+            playerScore: document.getElementById('playerScore'),
+            pigeonScore: document.getElementById('pigeonScore'),
+            timer: document.getElementById('timer'),
+            pigeon: document.getElementById('pigeon'),
+            popcornBag: document.getElementById('popcornBag'),
+            currentRound: document.getElementById('currentRound'),
+            menuHighScore: document.getElementById('menuHighScore'),
+            bestScore: document.getElementById('bestScore'),
+            comboDisplay: document.getElementById('comboDisplay'),
+            comboCount: document.getElementById('comboCount'),
+            freezeOverlay: document.getElementById('freezeOverlay')
+        };
+
+        // Sound Management
+        function playSound(soundId) {
+            if (!gameState.soundEffectsEnabled) return;
+            const sound = document.getElementById(soundId);
+            if (sound) {
+                sound.currentTime = 0;
+                sound.play().catch(e => console.log('Sound play failed:', e));
+            }
+        }
+
+        function playMusic(musicId) {
+            if (!gameState.musicEnabled) return;
+            const music = document.getElementById(musicId);
+            if (music) {
+                music.play().catch(e => console.log('Music play failed:', e));
+            }
+        }
+
+        function stopMusic(musicId) {
+            const music = document.getElementById(musicId);
+            if (music) {
+                music.pause();
+                music.currentTime = 0;
+            }
+        }
+
+        // Visual Effects Functions
+        function createPopParticles(x, y) {
+            const particleCount = 8;
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'pop-particle';
+                
+                const angle = (i / particleCount) * Math.PI * 2;
+                const velocity = 50 + Math.random() * 50;
+                const vx = Math.cos(angle) * velocity;
+                const vy = Math.sin(angle) * velocity;
+                
+                particle.style.left = x + 'px';
+                particle.style.top = y + 'px';
+                
+                const animation = particle.style;
+                animation.animation = 'none';
+                
+                document.getElementById('gameContainer').appendChild(particle);
+                
+                // Animate particle
+                requestAnimationFrame(() => {
+                    particle.style.transform = `translate(${vx}px, ${vy}px)`;
+                    particle.style.animation = 'particleFly 0.6s ease-out forwards';
+                });
+                
+                setTimeout(() => particle.remove(), 600);
+            }
+        }
+
+        function createScorePopup(x, y, text) {
+            const popup = document.createElement('div');
+            popup.className = 'score-popup';
+            popup.textContent = text;
+            popup.style.left = x + 'px';
+            popup.style.top = y + 'px';
+            document.getElementById('gameContainer').appendChild(popup);
+            
+            setTimeout(() => popup.remove(), 1000);
+        }
+
+        function createDustCloud(x, y) {
+            const dust = document.createElement('div');
+            dust.className = 'dust-cloud';
+            dust.style.left = (x - 20) + 'px';
+            dust.style.top = (y - 10) + 'px';
+            document.getElementById('gameContainer').appendChild(dust);
+            
+            setTimeout(() => dust.remove(), 500);
+        }
+
+        function createIceParticles() {
+            const particleCount = 5;
+            for (let i = 0; i < particleCount; i++) {
+                setTimeout(() => {
+                    const particle = document.createElement('div');
+                    particle.className = 'ice-particle';
+                    particle.style.left = Math.random() * window.innerWidth + 'px';
+                    particle.style.animationDelay = Math.random() * 3 + 's';
+                    document.getElementById('freezeOverlay').appendChild(particle);
+                    
+                    setTimeout(() => particle.remove(), 3000);
+                }, i * 200);
+            }
+        }
+
+        function shakeScreen() {
+            document.getElementById('gameContainer').classList.add('shake');
+            setTimeout(() => {
+                document.getElementById('gameContainer').classList.remove('shake');
+            }, 300);
+        }
+
+        function updateCombo() {
+            const currentTime = Date.now();
+            const timeSinceLastPop = currentTime - gameState.lastPopTime;
+            
+            if (timeSinceLastPop < 1000) { // Within 1 second
+                gameState.combo++;
+                if (gameState.combo >= 2) {
+                    elements.comboDisplay.style.display = 'block';
+                    elements.comboCount.textContent = gameState.combo;
+                    
+                    // Clear previous timeout
+                    if (gameState.comboTimeout) {
+                        clearTimeout(gameState.comboTimeout);
+                    }
+                    
+                    // Hide combo after 2 seconds of no activity
+                    gameState.comboTimeout = setTimeout(() => {
+                        elements.comboDisplay.style.display = 'none';
+                        gameState.combo = 0;
+                    }, 2000);
+                }
+            } else {
+                gameState.combo = 1;
+            }
+            
+            gameState.lastPopTime = currentTime;
+        }
+
+        // Settings Management
+        const settingsButton = document.getElementById('settingsButton');
+        const settingsMenu = document.getElementById('settingsMenu');
+        const settingsOverlay = document.getElementById('settingsOverlay');
+        const closeSettings = document.querySelector('.close-settings');
+        
+        let pausedTimer = null;
+        let pausedMusic = {
+            background: false,
+            machine: false
+        };
+
+        function openSettings() {
+            settingsMenu.classList.remove('hidden');
+            settingsOverlay.classList.remove('hidden');
+            
+            // Pause game if playing
+            if (gameState.playing && !gameState.paused) {
+                gameState.paused = true;
+                
+                // Pause spawn interval
+                if (spawnInterval) {
+                    clearInterval(spawnInterval);
+                }
+                
+                // Pause music
+                const bgMusic = document.getElementById('backgroundMusic');
+                const machineSound = document.getElementById('machineSound');
+                
+                if (bgMusic && !bgMusic.paused) {
+                    bgMusic.pause();
+                    pausedMusic.background = true;
+                }
+                
+                if (machineSound && !machineSound.paused) {
+                    machineSound.pause();
+                    pausedMusic.machine = true;
+                }
+            }
+        }
+
+        function closeSettingsMenu() {
+            settingsMenu.classList.add('hidden');
+            settingsOverlay.classList.add('hidden');
+            
+            // Resume game if it was paused
+            if (gameState.playing && gameState.paused) {
+                gameState.paused = false;
+                
+                // Resume spawn interval
+                const spawnDelay = Math.max(300, 800 / (1 + (gameState.round - 1) * 0.1));
+                spawnInterval = setInterval(spawnKernel, spawnDelay);
+                
+                // Resume music if it was playing
+                if (pausedMusic.background && gameState.musicEnabled) {
+                    document.getElementById('backgroundMusic').play();
+                }
+                
+                if (pausedMusic.machine && gameState.soundEffectsEnabled) {
+                    document.getElementById('machineSound').play();
+                }
+                
+                pausedMusic.background = false;
+                pausedMusic.machine = false;
+            }
+        }
+
+        settingsButton.addEventListener('click', openSettings);
+        closeSettings.addEventListener('click', closeSettingsMenu);
+        settingsOverlay.addEventListener('click', closeSettingsMenu);
+
+        // Toggle switches
+        document.getElementById('soundEffectsToggle').addEventListener('click', function() {
+            gameState.soundEffectsEnabled = !gameState.soundEffectsEnabled;
+            this.classList.toggle('active');
+        });
+
+        document.getElementById('musicToggle').addEventListener('click', function() {
+            gameState.musicEnabled = !gameState.musicEnabled;
+            this.classList.toggle('active');
+            if (!gameState.musicEnabled) {
+                stopMusic('backgroundMusic');
+            }
+        });
+
+        document.getElementById('vibrationToggle').addEventListener('click', function() {
+            gameState.vibrationEnabled = !gameState.vibrationEnabled;
+            this.classList.toggle('active');
+        });
+
+        document.getElementById('fpsToggle').addEventListener('click', function() {
+            gameState.showFPS = !gameState.showFPS;
+            this.classList.toggle('active');
+        });
+
+        // Share functionality
+        async function shareScore() {
+            const shareData = {
+                title: 'Hungry Pigeon',
+                text: `I scored ${gameState.playerScore} popcorns in Hungry Pigeon! 🍿🐦 Can you beat my score?`,
+                url: window.location.href
+            };
+
+            try {
+                if (navigator.share) {
+                    await navigator.share(shareData);
+                } else {
+                    // Fallback for desktop or browsers without share API
+                    const text = shareData.text + ' ' + shareData.url;
+                    if (navigator.clipboard) {
+                        await navigator.clipboard.writeText(text);
+                        alert('Score copied to clipboard! Share it with your friends!');
+                    } else {
+                        alert('Share: ' + text);
+                    }
+                }
+            } catch (err) {
+                console.log('Error sharing:', err);
+            }
+        }
+
+        function playRandomPopSound() {
+            const randomSound = popSounds[Math.floor(Math.random() * popSounds.length)];
+            playSound(randomSound);
+        }
+
+        // Initialize - Show splash screen
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                elements.splashScreen.classList.add('hidden');
+                elements.mainMenu.classList.remove('hidden');
+            }, 3000);
+        });
+
+        // Show high score on menu if exists
+        if (gameState.highScore > 0) {
+            elements.menuHighScore.classList.remove('hidden');
+            elements.bestScore.textContent = gameState.highScore;
+        }
+        
+        // Initialize bucket image
+        updatePopcornBucket();
+
+        // Kernel class
+        class Kernel {
+            constructor() {
+                this.element = document.createElement('div');
+                this.element.className = 'kernel';
+                
+                // Remove emoji text and use only the background image
+                this.element.textContent = '';
+                this.element.style.backgroundImage = `url('${kernelImages[Math.floor(Math.random() * kernelImages.length)]}')`;
+                this.element.style.backgroundPosition = 'center';
+                
+                // Add shadow element
+                this.shadow = document.createElement('div');
+                this.shadow.className = 'kernel-shadow';
+                this.element.appendChild(this.shadow);
+                
+                this.onGround = false;
+                this.popped = false;
+                
+                // Random starting position - center 50% of screen
+                const screenCenter = window.innerWidth / 2;
+                const spawnWidth = window.innerWidth * 0.5;
+                this.x = screenCenter - (spawnWidth / 2) + Math.random() * spawnWidth;
+                this.y = 50;
+                
+                // Movement properties based on game progress
+                const elapsedTime = 30 - gameState.timeLeft;
+                
+                // Difficulty progression
+                let difficultyLevel = 1;
+                if (elapsedTime <= 5) {
+                    difficultyLevel = 1;
+                } else if (elapsedTime <= 11) {
+                    difficultyLevel = 2;
+                } else if (elapsedTime <= 21) {
+                    difficultyLevel = 3;
+                } else {
+                    difficultyLevel = 4;
+                }
+                
+                // Base speed increases with difficulty
+                this.speed = gameState.baseSpeed + ((difficultyLevel - 1) * 0.8) * gameState.speedMultiplier;
+                
+                // Apply slow motion if active
+                if (gameState.activePowerUps.slowMotion) {
+                    this.speed *= 0.3;
+                }
+                
+                // Movement patterns by difficulty level
+                if (difficultyLevel === 1) {
+                    this.horizontalSpeed = 0;
+                } else if (difficultyLevel === 2) {
+                    this.horizontalSpeed = (Math.random() - 0.5) * 1.2;
+                } else if (difficultyLevel === 3) {
+                    this.horizontalSpeed = (Math.random() - 0.5) * 2;
+                    if (Math.random() < 0.3) {
+                        this.sway = true;
+                        this.swayAmplitude = 25;
+                        this.swayFrequency = 0.02;
+                    }
+                } else if (difficultyLevel === 4) {
+                    this.horizontalSpeed = (Math.random() - 0.5) * 3;
+                    if (Math.random() < 0.5) {
+                        this.sway = true;
+                        this.swayAmplitude = 35;
+                        this.swayFrequency = 0.025;
+                    }
+                }
+                
+                this.element.style.left = this.x + 'px';
+                this.element.style.top = this.y + 'px';
+                
+                // Click handler
+                this.element.addEventListener('click', () => this.pop());
+                this.element.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    this.pop();
+                });
+                
+                document.getElementById('gameContainer').appendChild(this.element);
+            }
+            
+            update() {
+                if (this.onGround) return true;
+                
+                // Apply slow motion to falling speed if active
+                let currentSpeed = this.speed;
+                if (gameState.activePowerUps.slowMotion) {
+                    currentSpeed *= 0.3;
+                }
+                
+                this.y += currentSpeed;
+                this.x += this.horizontalSpeed * (gameState.activePowerUps.slowMotion ? 0.3 : 1);
+                
+                if (this.sway) {
+                    this.x += Math.sin(this.y * this.swayFrequency) * this.swayAmplitude * 0.02;
+                }
+                
+                this.x = Math.max(0, Math.min(window.innerWidth - 40, this.x));
+                
+                this.element.style.left = this.x + 'px';
+                this.element.style.top = this.y + 'px';
+                
+                // Update shadow size based on distance from ground
+                const groundY = window.innerHeight - 80 - 30;
+                const distanceRatio = Math.min(1, this.y / groundY);
+                const shadowScale = 0.5 + distanceRatio * 0.5;
+                const shadowOpacity = 0.3 * (1 - distanceRatio * 0.5);
+                this.shadow.style.transform = `scale(${shadowScale})`;
+                this.shadow.style.opacity = shadowOpacity;
+                
+                if (this.y >= groundY) {
+                    this.y = groundY;
+                    this.element.style.top = this.y + 'px';
+                    this.hitGround();
+                }
+                
+                return true;
+            }
+            
+            hitGround() {
+                this.onGround = true;
+                this.element.style.pointerEvents = 'none';
+                this.element.style.opacity = '0.8';
+                this.element.style.zIndex = '5';
+                this.element.style.animation = 'none'; // Stop rotation
+                
+                // Create dust cloud effect
+                createDustCloud(this.x + 15, window.innerHeight - 80);
+                
+                // If pigeon is frozen, make kernels disappear instead of staying on ground
+                if (gameState.activePowerUps.freeze) {
+                    // Fade out and remove the kernel
+                    this.element.style.transition = 'opacity 0.5s ease-out';
+                    this.element.style.opacity = '0';
+                    setTimeout(() => this.remove(), 500);
+                    return;
+                }
+                
+                // FIX 2: Only add to fallen kernels if NOT in slow motion
+                if (!gameState.activePowerUps.slowMotion) {
+                    gameState.fallenKernels.push({
+                        x: this.x,
+                        element: this.element,
+                        kernel: this
+                    });
+                } else {
+                    // During slow motion, store kernels separately
+                    gameState.pendingFallenKernels.push({
+                        x: this.x,
+                        element: this.element,
+                        kernel: this
+                    });
+                }
+            }
+            
+            pop() {
+                if (!gameState.playing) return;
+                if (this.popped) return; // Prevent double-popping
+                
+                this.popped = true; // Mark as popped
+                this.remove(); // Remove immediately to stop falling
+                
+                // Update combo
+                updateCombo();
+                
+                // Play random pop sound
+                playRandomPopSound();
+                
+                // Create pop particles
+                createPopParticles(this.x + 15, this.y + 15);
+                
+                // Create score popup
+                let scoreText = '+1';
+                if (gameState.combo >= 2) {
+                    scoreText = `+1 x${gameState.combo}`;
+                }
+                createScorePopup(this.x + 15, this.y, scoreText);
+                
+                // Create popcorn effect
+                const popcorn = document.createElement('div');
+                popcorn.className = 'popcorn-pop';
+                popcorn.textContent = '';
+                popcorn.style.backgroundImage = `url('${popcornImages[Math.floor(Math.random() * popcornImages.length)]}')`;
+                popcorn.style.left = this.x + 'px';
+                popcorn.style.top = this.y + 'px';
+                document.getElementById('gameContainer').appendChild(popcorn);
+                
+                setTimeout(() => popcorn.remove(), 500);
+                
+                // Create popcorn flying to bucket
+                const collectPopcorn = document.createElement('div');
+                collectPopcorn.className = 'popcorn-collect';
+                collectPopcorn.innerHTML = '&nbsp;'; // Add content for sizing
+                const randomPopcornImage = popcornImages[Math.floor(Math.random() * popcornImages.length)];
+                collectPopcorn.style.backgroundImage = `url('${randomPopcornImage}')`;
+                collectPopcorn.style.backgroundPosition = 'center';
+                collectPopcorn.style.backgroundSize = 'contain';
+                collectPopcorn.style.left = this.x + 'px';
+                collectPopcorn.style.top = this.y + 'px';
+                collectPopcorn.style.opacity = '1';
+                document.getElementById('gameContainer').appendChild(collectPopcorn);
+                
+                setTimeout(() => {
+                    collectPopcorn.style.left = '60px';
+                    collectPopcorn.style.top = (window.innerHeight - 100) + 'px';
+                    collectPopcorn.style.opacity = '0';
+                    collectPopcorn.style.transform = 'scale(0.5)';
+                }, 50);
+                
+                setTimeout(() => collectPopcorn.remove(), 850);
+                
+                // Update score with animation
+                gameState.playerScore++;
+                elements.playerScore.textContent = gameState.playerScore;
+		updatePopcornBucket();
+                elements.scoreBoard.classList.add('score-bump');
+                setTimeout(() => elements.scoreBoard.classList.remove('score-bump'), 300);
+                
+                // Bucket bounce animation
+                elements.popcornBag.classList.add('bucket-bounce');
+                setTimeout(() => elements.popcornBag.classList.remove('bucket-bounce'), 500);
+                
+                updatePopcornBucket();
+                
+                // Multi-pop power-up effect
+                if (gameState.activePowerUps.multiPop) {
+                    const nearbyKernels = gameState.kernels.filter(k => {
+                        const distance = Math.sqrt(Math.pow(k.x - this.x, 2) + Math.pow(k.y - this.y, 2));
+                        return distance < 100 && k !== this && !k.onGround;
+                    });
+                    
+                    if (nearbyKernels.length > 0) {
+                        shakeScreen();
+                    }
+                    
+                    nearbyKernels.forEach((k, index) => {
+                        setTimeout(() => k.pop(), index * 50);
+                    });
+                    
+                    gameState.activePowerUps.multiPop = false;
+                }
+                
+                // Remove kernel immediately to stop it from falling
+                this.remove();
+                
+                // Vibrate if available and enabled
+                if (navigator.vibrate && gameState.vibrationEnabled) {
+                    navigator.vibrate(10);
+                }
+            }
+            
+            remove() {
+                this.element.remove();
+                
+                const kernelIndex = gameState.kernels.indexOf(this);
+                if (kernelIndex > -1) {
+                    gameState.kernels.splice(kernelIndex, 1);
+                }
+                
+                const fallenIndex = gameState.fallenKernels.findIndex(f => f.kernel === this);
+                if (fallenIndex > -1) {
+                    gameState.fallenKernels.splice(fallenIndex, 1);
+                }
+                
+                // Also check pending fallen kernels
+                if (gameState.pendingFallenKernels) {
+                    const pendingIndex = gameState.pendingFallenKernels.findIndex(f => f.kernel === this);
+                    if (pendingIndex > -1) {
+                        gameState.pendingFallenKernels.splice(pendingIndex, 1);
+                    }
+                }
+            }
+        }
+
+        // Update popcorn bucket based on score
+        function updatePopcornBucket() {
+            const bucket = elements.popcornBag;
+            if (gameState.playerScore <= 10) {
+                bucket.style.backgroundImage = "url('assets/images/popcorn/Popcorn_Bucket_1.png')";
+            } else if (gameState.playerScore <= 20) {
+                bucket.style.backgroundImage = "url('assets/images/popcorn/Popcorn_Bucket_2.png')";
+            } else {
+                bucket.style.backgroundImage = "url('assets/images/popcorn/Popcorn_Bucket_3.png')";
+            }
+        }
+
+        // Power-up functions
+        function activatePowerUp(type) {
+            if (gameState.powerUps[type] <= 0 || !gameState.playing) return;
+            
+            gameState.powerUps[type]--;
+            updatePowerUpDisplay();
+            
+            switch(type) {
+                case 'slowMotion':
+                    gameState.activePowerUps.slowMotion = true;
+                    document.getElementById('gameContainer').classList.add('slow-motion-active');
+                    
+                    // FIX 2: When slow motion ends, add pending kernels
+                    setTimeout(() => {
+                        gameState.activePowerUps.slowMotion = false;
+                        document.getElementById('gameContainer').classList.remove('slow-motion-active');
+                        
+                        // Add kernels that fell during slow motion
+                        if (gameState.pendingFallenKernels.length > 0) {
+                            gameState.fallenKernels.push(...gameState.pendingFallenKernels);
+                            gameState.pendingFallenKernels = [];
+                        }
+                    }, 3000);
+                    break;
+                    
+                case 'multiPop':
+                    gameState.activePowerUps.multiPop = true;
+                    break;
+                    
+                case 'freeze':
+                    gameState.activePowerUps.freeze = true;
+                    elements.pigeon.style.filter = 'grayscale(100%) brightness(1.5)';
+                    elements.freezeOverlay.classList.add('active');
+                    createIceParticles();
+                    
+                    setTimeout(() => {
+                        gameState.activePowerUps.freeze = false;
+                        elements.pigeon.style.filter = '';
+                        elements.freezeOverlay.classList.remove('active');
+                    }, 3000);
+                    break;
+            }
+        }
+
+        // Update power-up display
+        function updatePowerUpDisplay() {
+            document.querySelector('#slowMotionPower .powerup-count').textContent = gameState.powerUps.slowMotion;
+            document.querySelector('#multiPopPower .powerup-count').textContent = gameState.powerUps.multiPop;
+            document.querySelector('#freezePower .powerup-count').textContent = gameState.powerUps.freeze;
+            
+            // Update disabled state
+            document.getElementById('slowMotionPower').classList.toggle('disabled', gameState.powerUps.slowMotion === 0);
+            document.getElementById('multiPopPower').classList.toggle('disabled', gameState.powerUps.multiPop === 0);
+            document.getElementById('freezePower').classList.toggle('disabled', gameState.powerUps.freeze === 0);
+        }
+
+        // Countdown function
+        function showCountdown() {
+            elements.mainMenu.classList.add('hidden');
+            elements.countdownScreen.classList.remove('hidden');
+            
+            // Update round display in countdown
+            document.getElementById('countdownRound').textContent = gameState.round;
+            
+            // Set countdown message based on round
+            const message = gameState.round === 1 ? "The pigeon is hungry" : "The pigeon is getting hungrier...";
+            document.getElementById('countdownMessage').textContent = message;
+            
+            let count = 3;
+            const countdownEl = document.getElementById('countdownNumber');
+            countdownEl.textContent = count;
+            
+            playSound('startSound');
+            
+            const countdownInterval = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    countdownEl.textContent = count;
+                    countdownEl.style.animation = 'none';
+                    setTimeout(() => countdownEl.style.animation = 'countdownPulse 1s ease-out', 10);
+                } else {
+                    clearInterval(countdownInterval);
+                    elements.countdownScreen.classList.add('hidden');
+                    startGame();
+                }
+            }, 1000);
+        }
+
+        // Game Functions
+        let gameInterval;
+        let spawnInterval;
+        let timerInterval;
+
+        function startGame() {
+            // Play background music and machine sound
+            playMusic('backgroundMusic');
+            playSound('machineSound');
+            
+            // Clean up any remaining elements
+            document.querySelectorAll('.kernel, .popcorn-pop, .popcorn-collect, .score-popup, .dust-cloud').forEach(el => el.remove());
+            
+            // Reset game state
+            gameState.playing = true;
+            gameState.paused = false;
+            gameState.playerScore = 0;
+            gameState.pigeonScore = 0;
+            gameState.timeLeft = 30;
+            gameState.speedMultiplier = 1 + (gameState.round - 1) * 0.1;
+            gameState.pendingFallenKernels = [];
+            gameState.combo = 0;
+            gameState.lastPopTime = 0;
+            
+            // Reset power-ups
+            gameState.activePowerUps.slowMotion = false;
+            gameState.activePowerUps.freeze = false;
+            gameState.activePowerUps.multiPop = false;
+            
+            // Update UI
+            elements.playerScore.textContent = '0';
+            elements.pigeonScore.textContent = '0';
+            elements.timer.textContent = '30';
+            elements.timer.style.color = '#333';
+            elements.timer.classList.remove('urgent');
+            elements.currentRound.textContent = gameState.round;
+            elements.pigeon.className = '';
+            elements.comboDisplay.style.display = 'none';
+            updatePopcornBucket();
+            updatePowerUpDisplay();
+            
+            // Clear kernels
+            gameState.kernels.forEach(kernel => kernel.remove());
+            gameState.kernels = [];
+            gameState.fallenKernels.forEach(fallen => fallen.element.remove());
+            gameState.fallenKernels = [];
+            
+            // Reset pigeon
+            gameState.pigeonX = window.innerWidth / 2;
+            elements.pigeon.style.left = gameState.pigeonX + 'px';
+            gameState.pigeonMoving = false;
+            
+            // Show game UI
+            elements.gameUI.classList.remove('hidden');
+            document.getElementById('settingsButton').classList.add('visible');
+            
+            // Start game loop
+            gameInterval = setInterval(gameLoop, 1000 / 60);
+            // Decrease spawn interval by 10% each round (more kernels = shorter interval)
+            const spawnDelay = Math.max(300, 800 / (1 + (gameState.round - 1) * 0.1));
+            spawnInterval = setInterval(spawnKernel, spawnDelay);
+            
+            // Start timer
+            timerInterval = setInterval(() => {
+                if (gameState.paused) return;
+                
+                gameState.timeLeft--;
+                elements.timer.textContent = gameState.timeLeft;
+                
+                if (gameState.timeLeft <= 10) {
+                    elements.timer.style.color = '#FF6B6B';
+                }
+                
+                if (gameState.timeLeft <= 5) {
+                    elements.timer.classList.add('urgent');
+                }
+                
+                if (gameState.timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    clearInterval(spawnInterval);
+                    
+                    // Stop background music when time is up
+                    stopMusic('backgroundMusic');
+                    stopMusic('machineSound');
+    
+                    playSound('timeUpSound');
+                    elements.timer.textContent = "Time's Up!";
+                    elements.timer.style.color = '#FFD700';
+                    elements.timer.classList.remove('urgent');
+    
+                    const checkKernels = setInterval(() => {
+                        const fallingKernels = gameState.kernels.filter(kernel => !kernel.onGround);
+                
+                        if (fallingKernels.length === 0) {
+                            clearInterval(checkKernels);
+                            setTimeout(() => endGame(), 2000);
+                        }
+                    }, 100);
+                }
+            }, 1000);
+        }
+
+        function gameLoop() {
+            if (!gameState.playing || gameState.paused) return;
+            
+            gameState.kernels.forEach(kernel => kernel.update());
+            
+            updatePigeon();
+        }
+        
+        function updatePigeon() {
+            if (gameState.fallenKernels.length === 0) {
+                gameState.pigeonMoving = false;
+                elements.pigeon.classList.remove('walking');
+                return;
+            }
+            if (gameState.activePowerUps.freeze) return;
+            // FIX 2: Don't update pigeon during slow motion
+            if (gameState.activePowerUps.slowMotion) return;
+            
+            const elapsedTime = 30 - gameState.timeLeft;
+            let pigeonSpeed = gameState.pigeonSpeed;
+            
+            if (elapsedTime <= 5) {
+                pigeonSpeed = gameState.pigeonSpeed * 1.2;
+            } else if (elapsedTime <= 11) {
+                pigeonSpeed = gameState.pigeonSpeed * 1.5;
+            } else if (elapsedTime <= 21) {
+                pigeonSpeed = gameState.pigeonSpeed * 1.8;
+            } else {
+                pigeonSpeed = gameState.pigeonSpeed * 2.2;
+            }
+            
+            let nearestKernel = null;
+            let nearestDistance = Infinity;
+            
+            gameState.fallenKernels.forEach(fallen => {
+                const distance = Math.abs(fallen.x - gameState.pigeonX);
+                if (distance < nearestDistance) {
+                    nearestDistance = distance;
+                    nearestKernel = fallen;
+                }
+            });
+            
+            if (nearestKernel) {
+                const direction = nearestKernel.x > gameState.pigeonX ? 1 : -1;
+                gameState.pigeonX += direction * pigeonSpeed;
+                
+                // Add walking animation
+                if (!gameState.pigeonMoving) {
+                    gameState.pigeonMoving = true;
+                    elements.pigeon.classList.add('walking');
+                }
+                
+                // FIX 3: Direct position update for smooth movement
+                elements.pigeon.style.left = gameState.pigeonX + 'px';
+                
+                // FIX 3: Better sprite management
+                const wasEating = elements.pigeon.classList.contains('eating-right') || 
+                                elements.pigeon.classList.contains('eating-left');
+                
+                if (!wasEating) {
+                    if (direction === -1 && !elements.pigeon.classList.contains('facing-left')) {
+                        elements.pigeon.className = 'facing-left walking';
+                    } else if (direction === 1 && elements.pigeon.classList.contains('facing-left')) {
+                        elements.pigeon.className = 'walking';
+                    }
+                }
+                
+                if (nearestDistance < 30) {
+                    eatKernel(nearestKernel);
+                }
+            }
+        }
+        
+        function eatKernel(fallenKernel) {
+            fallenKernel.element.remove();
+            
+            gameState.pigeonScore++;
+            elements.pigeonScore.textContent = gameState.pigeonScore;
+            
+            // Play pigeon coo sound randomly every 3-5 seconds
+            const currentTime = Date.now();
+            const timeSinceLastCoo = currentTime - gameState.lastCooTime;
+            const cooInterval = 3000 + Math.random() * 2000; // 3-5 seconds
+
+            if (timeSinceLastCoo > cooInterval) {
+                playSound('pigeonCooSound');
+                gameState.lastCooTime = currentTime;
+            }
+            
+            // FIX 3: Better eating animation
+            const isFacingLeft = elements.pigeon.classList.contains('facing-left');
+            
+            // Set eating animation
+            elements.pigeon.className = isFacingLeft ? 'facing-left eating-left' : 'eating-right';
+            
+            // Remove eating animation after delay
+            setTimeout(() => {
+                if (isFacingLeft) {
+                    elements.pigeon.className = 'facing-left';
+                } else {
+                    elements.pigeon.className = '';
+                }
+                gameState.pigeonMoving = false;
+            }, 300);
+            
+            const index = gameState.fallenKernels.indexOf(fallenKernel);
+            if (index > -1) {
+                gameState.fallenKernels.splice(index, 1);
+            }
+        }
+
+        function spawnKernel() {
+            if (!gameState.playing || gameState.timeLeft <= 0) return;
+            
+            const elapsedTime = 30 - gameState.timeLeft;
+            
+            let spawnChance = 1;
+            let multiSpawnChance = 0;
+            
+            if (elapsedTime <= 5) {
+                spawnChance = 1.5;
+                multiSpawnChance = 0.25;
+            } else if (elapsedTime <= 11) {
+                spawnChance = 1.1;
+                multiSpawnChance = 0.15;
+            } else if (elapsedTime <= 21) {
+                spawnChance = 1.3;
+                multiSpawnChance = 0.25;
+            } else {
+                spawnChance = 1.6;
+                multiSpawnChance = 0.4;
+            }
+            
+            if (Math.random() < spawnChance) {
+                gameState.kernels.push(new Kernel());
+            }
+            
+            if (Math.random() < multiSpawnChance) {
+                setTimeout(() => {
+                    if (gameState.playing && gameState.timeLeft > 0) {
+                        gameState.kernels.push(new Kernel());
+                    }
+                }, 200);
+            }
+        }
+
+        function endGame() {
+            gameState.playing = false;
+            clearInterval(gameInterval);
+            clearInterval(spawnInterval);
+            
+            // Stop sounds
+            stopMusic('backgroundMusic');
+            stopMusic('machineSound');
+            
+            // Clear kernels
+            gameState.kernels.forEach(kernel => kernel.remove());
+            gameState.kernels = [];
+            gameState.fallenKernels.forEach(fallen => fallen.element.remove());
+            gameState.fallenKernels = [];
+            
+            // Check high score
+            const isNewHighScore = gameState.playerScore > gameState.highScore;
+            if (isNewHighScore) {
+                gameState.highScore = gameState.playerScore;
+            }
+            
+            // Update game over screen
+            document.getElementById('finalPlayerScore').textContent = gameState.playerScore;
+            document.getElementById('finalPigeonScore').textContent = gameState.pigeonScore;
+            
+            const title = document.getElementById('gameOverTitle');
+            const message = document.getElementById('resultMessage');
+            const highScoreEl = document.getElementById('highScore');
+            const resultPigeon = document.getElementById('resultPigeon');
+            const playAgainBtn = document.getElementById('playAgainButton');
+            
+            if (gameState.playerScore > gameState.pigeonScore) {
+                title.textContent = 'You Win!';
+                message.innerHTML = '';
+                resultPigeon.style.backgroundImage = "url('assets/images/pigeon/Pigeon_Angry.png')";
+                playSound('pigeonLoseSound');
+                playAgainBtn.textContent = 'NEXT ROUND';
+                gameState.round++;
+                
+                // Award power-ups every 5 rounds
+                if (gameState.round % 5 === 1 && gameState.round > 1) {
+                    gameState.powerUps.slowMotion += 1;
+                    gameState.powerUps.multiPop += 1;
+                    gameState.powerUps.freeze += 1;
+                    message.innerHTML = '<div style="font-size: 20px; color: #FFD700; margin-top: 10px;">🎁 Bonus Power-ups Earned!</div>';
+                }
+            } else {
+                title.textContent = 'The Pigeon Wins!';
+                message.innerHTML = '';
+                resultPigeon.style.backgroundImage = "url('assets/images/pigeon/Pigeon_Win.gif')";
+                resultPigeon.classList.add('victory-dance');
+                playSound('pigeonWinSound');
+                playAgainBtn.textContent = 'TRY AGAIN';
+                gameState.round = 1;
+            }
+            
+            if (isNewHighScore) {
+                highScoreEl.textContent = '🏆 NEW HIGH SCORE! 🏆';
+                highScoreEl.classList.add('new-high-score');
+            } else {
+                highScoreEl.textContent = `Best: ${gameState.highScore} 🍿`;
+                highScoreEl.classList.remove('new-high-score');
+            }
+            
+            elements.gameUI.classList.add('hidden');
+            elements.gameOverScreen.classList.remove('hidden');
+            document.getElementById('settingsButton').classList.remove('visible');
+        }
+
+        function playAgain() {
+            elements.gameOverScreen.classList.add('hidden');
+            showCountdown();
+        }
+
+        function showMenu() {
+            if (gameState.highScore > 0) {
+                elements.menuHighScore.classList.remove('hidden');
+                elements.bestScore.textContent = gameState.highScore;
+            }
+            
+            gameState.round = 1;
+            
+            elements.gameOverScreen.classList.add('hidden');
+            elements.mainMenu.classList.remove('hidden');
+        }
+
+        // FIX 1: Watch Ad for Power-up - Proper randomization
+        function watchAdForPowerUp() {
+            // This is where you'd integrate with your ad provider
+            alert('Ad integration placeholder - In production, this would show an ad');
+    
+            // Random distribution: 2 of one type, 1 of another
+            const powerUpTypes = ['slowMotion', 'multiPop', 'freeze'];
+    
+            // Randomly select which power-up gets 2
+            const mainPowerUpIndex = Math.floor(Math.random() * powerUpTypes.length);
+            const mainPowerUp = powerUpTypes[mainPowerUpIndex];
+    
+            // Remove the main power-up from array and select secondary
+            const remainingPowerUps = powerUpTypes.filter((_, index) => index !== mainPowerUpIndex);
+            const secondaryPowerUp = remainingPowerUps[Math.floor(Math.random() * remainingPowerUps.length)];
+    
+            // Give 2 of main, 1 of secondary
+            gameState.powerUps[mainPowerUp] += 2;
+            gameState.powerUps[secondaryPowerUp] += 1;
+    
+            // Display which power-ups were received
+            const powerUpNames = {
+                slowMotion: 'Slow Motion',
+                multiPop: 'Multi-Pop',
+                freeze: 'Freeze'
+            };
+    
+            alert(`You received 2 ${powerUpNames[mainPowerUp]} and 1 ${powerUpNames[secondaryPowerUp]} power-ups!`);
+    
+            // Update the display immediately
+            updatePowerUpDisplay();
+        }
+
+        // Power-up click handlers
+        document.getElementById('slowMotionPower').addEventListener('click', () => activatePowerUp('slowMotion'));
+        document.getElementById('multiPopPower').addEventListener('click', () => activatePowerUp('multiPop'));
+        document.getElementById('freezePower').addEventListener('click', () => activatePowerUp('freeze'));
+
+        // Prevent scrolling on mobile
+        document.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            // Kernels will adapt on next spawn
+        });
+
+        // Event listeners
+        document.getElementById('playButton').addEventListener('click', showCountdown);
+        document.getElementById('playAgainButton').addEventListener('click', playAgain);
+        document.getElementById('watchAdButton').addEventListener('click', watchAdForPowerUp);
+    </script>
+    <script>
+    // Register Service Worker
+        if ('serviceWorker' in navigator) {
+         window.addEventListener('load', () => {
+           navigator.serviceWorker.register('/sw.js');
+         });
+        }
+    </script>
+</body>
+</html>
