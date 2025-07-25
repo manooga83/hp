@@ -2018,6 +2018,19 @@
             gameState.pigeonScore++;
             elements.pigeonScore.textContent = gameState.pigeonScore;
             
+            // Check if we're still in eating animation cooldown
+            const currentTime = Date.now();
+            if (gameState.lastEatingAnimationTime && currentTime - gameState.lastEatingAnimationTime < 500) {
+                // Skip the eating animation if it's been less than 500ms
+                const index = gameState.fallenKernels.indexOf(fallenKernel);
+                if (index > -1) {
+                    gameState.fallenKernels.splice(index, 1);
+                }
+                return;
+            }
+            
+            gameState.lastEatingAnimationTime = currentTime;
+            
             // Play pigeon coo sound randomly every 3-5 seconds
             const currentTime = Date.now();
             const timeSinceLastCoo = currentTime - gameState.lastCooTime;
