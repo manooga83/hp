@@ -2015,9 +2015,9 @@
                 const newPigeonX = gameState.pigeonX + (direction * pigeonSpeed);
 
                 // Check boundaries and only prevent movement towards the boundary
-                if (direction === 1 && newPigeonX > window.innerWidth - 80) {
+                if (direction === 1 && newPigeonX > window.innerWidth - 120) {
                     // Moving right and would exceed right boundary
-                    gameState.pigeonX = window.innerWidth - 80;
+                    gameState.pigeonX = window.innerWidth - 120;
                 } else if (direction === -1 && newPigeonX < 0) {
                     // Moving left and would exceed left boundary
                     gameState.pigeonX = 0;
