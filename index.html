@@ -2002,8 +2002,11 @@
                     const currentTime = Date.now();
                     const timeSinceLastChange = currentTime - gameState.lastDirectionChangeTime;
                     
-                    if (timeSinceLastChange < 500) {
-                        // Still in cooldown, don't move
+                    // Allow immediate direction change if at screen boundary
+                    const isAtBoundary = (gameState.pigeonX <= 0) || (gameState.pigeonX >= window.innerWidth - 90);
+                    
+                    if (timeSinceLastChange < 500 && !isAtBoundary) {
+                        // Still in cooldown and not at boundary, don't move
                         return;
                     }
                 }
