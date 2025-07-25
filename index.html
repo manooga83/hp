@@ -1594,15 +1594,6 @@
                 // Create dust cloud effect
                 createDustCloud(this.x + 15, window.innerHeight - 48);
                 
-                // If pigeon is frozen, make kernels disappear instead of staying on ground
-                if (gameState.activePowerUps.freeze) {
-                    // Fade out and remove the kernel
-                    this.element.style.transition = 'opacity 0.5s ease-out';
-                    this.element.style.opacity = '0';
-                    setTimeout(() => this.remove(), 500);
-                    return;
-                }
-                
                 // FIX 2: Only add to fallen kernels if NOT in slow motion
                 if (!gameState.activePowerUps.slowMotion) {
                     // Add a timestamp when kernel hits ground
