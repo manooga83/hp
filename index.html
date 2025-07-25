@@ -1987,6 +1987,12 @@
                     elements.timer.textContent = "Time's Up!";
                     elements.timer.style.color = '#FFD700';
                     elements.timer.classList.remove('urgent');
+
+                    // Stop funnel animation
+                    const funnel = document.getElementById('kernelDispenser');
+                    if (funnel) {
+                        funnel.style.backgroundImage = 'none';
+                    }
     
                     const checkKernels = setInterval(() => {
                         const fallingKernels = gameState.kernels.filter(kernel => !kernel.onGround);
