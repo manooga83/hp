@@ -1988,10 +1988,10 @@
                     elements.timer.style.color = '#FFD700';
                     elements.timer.classList.remove('urgent');
 
-                    // Stop funnel animation
+                    // Stop funnel animation by replacing with static image
                     const funnel = document.getElementById('kernelDispenser');
                     if (funnel) {
-                        funnel.style.backgroundImage = 'none';
+                        funnel.style.backgroundImage = "url('assets/images/ui/Kettle_Static.png')";
                     }
     
                     const checkKernels = setInterval(() => {
