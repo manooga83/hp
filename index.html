@@ -1119,6 +1119,7 @@
             combo: 0,
             lastPopTime: 0,
             lastEatingAnimationTime: 0,
+            lastDirectionChangeTime: 0,
             comboTimeout: null,
             // Settings
             soundEffectsEnabled: true,
@@ -2004,12 +2005,20 @@
                 // FIX 3: Better sprite management
                 const wasEating = elements.pigeon.classList.contains('eating-right') || 
                                 elements.pigeon.classList.contains('eating-left');
-                
+
                 if (!wasEating) {
-                    if (direction === -1 && !elements.pigeon.classList.contains('facing-left')) {
-                        elements.pigeon.className = 'facing-left walking';
-                    } else if (direction === 1 && elements.pigeon.classList.contains('facing-left')) {
-                        elements.pigeon.className = 'walking';
+                    const currentTime = Date.now();
+                    const timeSinceLastChange = currentTime - gameState.lastDirectionChangeTime;
+                    
+                    // Only allow direction change after 500ms cooldown
+                    if (timeSinceLastChange > 500) {
+                        if (direction === -1 && !elements.pigeon.classList.contains('facing-left')) {
+                            elements.pigeon.className = 'facing-left walking';
+                            gameState.lastDirectionChangeTime = currentTime;
+                        } else if (direction === 1 && elements.pigeon.classList.contains('facing-left')) {
+                            elements.pigeon.className = 'walking';
+                            gameState.lastDirectionChangeTime = currentTime;
+                        }
                     }
                 }
                 
