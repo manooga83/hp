@@ -1558,7 +1558,7 @@
                 }
                 
                 // Keep within bounds (with larger margin to prevent edge kernels)
-                this.x = Math.max(20, Math.min(window.innerWidth - 60, this.x));
+                this.x = Math.max(20, Math.min(window.innerWidth - 120, this.x));
                 
                 this.element.style.left = this.x + 'px';
                 this.element.style.top = this.y + 'px';
@@ -1582,7 +1582,7 @@
             
             hitGround() {
                 // Check if kernel is outside playable bounds
-                if (this.x < 0 || this.x > window.innerWidth - 40) {
+                if (this.x < 0 || this.x > window.innerWidth - 120) {
                     // Remove kernels that land outside bounds
                     this.remove();
                     return;
@@ -2000,22 +2000,11 @@
             if (nearestKernel) {
                 const direction = nearestKernel.x > gameState.pigeonX ? 1 : -1;
                 
-                // Check if pigeon is facing the correct direction
-                const currentlyFacingLeft = elements.pigeon.classList.contains('facing-left');
-                const shouldFaceLeft = direction === -1;
-                const isFacingCorrectDirection = (currentlyFacingLeft === shouldFaceLeft);
-                
-                // FIX 3: Direct movement and sprite management
+                // Calculate new position
                 const newPigeonX = gameState.pigeonX + (direction * pigeonSpeed);
-
-                // Always update position but respect boundaries
-                if (direction === 1 && newPigeonX > window.innerWidth - 120) {
-                    gameState.pigeonX = window.innerWidth - 120;
-                } else if (direction === -1 && newPigeonX < 0) {
-                    gameState.pigeonX = 0;
-                } else {
-                    gameState.pigeonX = newPigeonX;
-                }
+                
+                // Update position with boundaries
+                gameState.pigeonX = Math.max(0, Math.min(window.innerWidth - 120, newPigeonX));
 
                 // Add walking animation
                 if (!gameState.pigeonMoving) {
