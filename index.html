@@ -2011,12 +2011,16 @@
                 // Calculate new position
                 const newPigeonX = gameState.pigeonX + (direction * pigeonSpeed);
 
-                // Only move if within bounds
-                if (newPigeonX >= 0 && newPigeonX <= window.innerWidth - 90) {
-                    gameState.pigeonX = newPigeonX;
+                // Check boundaries and only prevent movement towards the boundary
+                if (direction === 1 && newPigeonX > window.innerWidth - 80) {
+                    // Moving right and would exceed right boundary
+                    gameState.pigeonX = window.innerWidth - 80;
+                } else if (direction === -1 && newPigeonX < 0) {
+                    // Moving left and would exceed left boundary
+                    gameState.pigeonX = 0;
                 } else {
-                    // At boundary, but still allow movement in opposite direction
-                    gameState.pigeonX = Math.max(0, Math.min(window.innerWidth - 90, newPigeonX));
+                    // Normal movement
+                    gameState.pigeonX = newPigeonX;
                 }
 
                 // Add walking animation
