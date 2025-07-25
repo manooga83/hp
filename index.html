@@ -1169,6 +1169,7 @@
             lastEatingAnimationTime: 0,
             lastDirectionChangeTime: 0,
             comboTimeout: null,
+            savedRound: null,
             // Settings
             soundEffectsEnabled: true,
             musicEnabled: true,
@@ -2416,10 +2417,16 @@
             // Show ad placeholder
             alert('Ad integration placeholder - In production, this would show an ad');
             
+            // Debug: Check saved round
+            console.log('Saved round:', gameState.savedRound);
+            console.log('Current round before restore:', gameState.round);
+            
             // Restore the saved round
             if (gameState.savedRound) {
                 gameState.round = gameState.savedRound;
             }
+            
+            console.log('Round after restore:', gameState.round);
             
             // After "watching ad", continue at same round
             elements.gameOverScreen.classList.add('hidden');
