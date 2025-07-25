@@ -2008,11 +2008,16 @@
                     }
                 }
                 
-                // Now we can move
-                gameState.pigeonX += direction * pigeonSpeed;
+                // Calculate new position
+                const newPigeonX = gameState.pigeonX + (direction * pigeonSpeed);
 
-                // Keep pigeon within screen bounds (considering pigeon width ~90px)
-                gameState.pigeonX = Math.max(0, Math.min(window.innerWidth - 70, gameState.pigeonX));
+                // Only move if within bounds
+                if (newPigeonX >= 0 && newPigeonX <= window.innerWidth - 90) {
+                    gameState.pigeonX = newPigeonX;
+                } else {
+                    // At boundary, but still allow movement in opposite direction
+                    gameState.pigeonX = Math.max(0, Math.min(window.innerWidth - 90, newPigeonX));
+                }
 
                 // Add walking animation
                 if (!gameState.pigeonMoving) {
