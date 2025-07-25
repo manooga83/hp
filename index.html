@@ -2012,7 +2012,7 @@
                 gameState.pigeonX += direction * pigeonSpeed;
 
                 // Keep pigeon within screen bounds (considering pigeon width ~90px)
-                gameState.pigeonX = Math.max(0, Math.min(window.innerWidth - 90, gameState.pigeonX));
+                gameState.pigeonX = Math.max(0, Math.min(window.innerWidth - 80, gameState.pigeonX));
 
                 // Add walking animation
                 if (!gameState.pigeonMoving) {
