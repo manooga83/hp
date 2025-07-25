@@ -1959,12 +1959,6 @@
             // FIX 2: Don't update pigeon during slow motion
             if (gameState.activePowerUps.slowMotion) return;
             
-            // Don't move if currently eating
-            if (elements.pigeon.classList.contains('eating-right') || 
-                elements.pigeon.classList.contains('eating-left')) {
-                return;
-            }
-            
             const elapsedTime = 30 - gameState.timeLeft;
             let pigeonSpeed = gameState.pigeonSpeed;
             
