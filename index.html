@@ -1582,10 +1582,28 @@
                 this.element.style.pointerEvents = 'none';
                 this.element.style.zIndex = '5';
 
-                // Stop rotation and shrink to 50% over 0.5 seconds
+                // Stop rotation
                 this.element.style.animation = 'none';
-                this.element.style.transition = 'transform 0.5s ease-out';
-                this.element.style.transform = 'scale(0.5)';
+
+                // Random bounce direction and distance
+                const bounceDirection = Math.random() < 0.5 ? -1 : 1;
+                const bounceDistance = 20 + Math.random() * 40; // 20-60 pixels
+                const bounceHeight = 30 + Math.random() * 20; // 30-50 pixels
+                const finalX = this.x + (bounceDirection * bounceDistance);
+
+                // Ensure kernel stays within screen bounds
+                this.x = Math.max(10, Math.min(window.innerWidth - 30, finalX));
+
+                // Animate bounce and shrink
+                this.element.style.transition = 'all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                this.element.style.transform = `translateY(-${bounceHeight}px) scale(0.7)`;
+                this.element.style.left = this.x + 'px';
+
+                // After bounce up, fall back down with final shrink
+                setTimeout(() => {
+                    this.element.style.transition = 'all 0.3s ease-in';
+                    this.element.style.transform = 'translateY(0) scale(0.5)';
+                }, 200);
 
                 // Gradually shrink kernel to 50% when on ground
                 this.element.style.transition = 'transform 0.3s ease-out';
@@ -1597,8 +1615,10 @@
                 // FIX 2: Only add to fallen kernels if NOT in slow motion
                 if (!gameState.activePowerUps.slowMotion) {
                     // Add a timestamp when kernel hits ground
+                    // Store reference to this kernel for position update
+                    const kernelRef = this;
                     const fallenKernel = {
-                        x: this.x,
+                        get x() { return kernelRef.x; }, // Dynamic position getter
                         element: this.element,
                         kernel: this,
                         landedAt: Date.now()
