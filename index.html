@@ -1561,7 +1561,7 @@
                 this.element.style.top = this.y + 'px';
                 
                 // Update shadow size based on distance from ground
-                const groundY = window.innerHeight - 120 - 30;
+                const groundY = window.innerHeight - 110 - 30;
                 const distanceRatio = Math.min(1, this.y / groundY);
                 const shadowScale = 0.5 + distanceRatio * 0.5;
                 const shadowOpacity = 0.3 * (1 - distanceRatio * 0.5);
@@ -1585,7 +1585,7 @@
                 this.element.style.animation = 'none'; // Stop rotation
                 
                 // Create dust cloud effect
-                createDustCloud(this.x + 15, window.innerHeight - 120);
+                createDustCloud(this.x + 15, window.innerHeight - 110);
                 
                 // If pigeon is frozen, make kernels disappear instead of staying on ground
                 if (gameState.activePowerUps.freeze) {
