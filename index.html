@@ -2005,11 +2005,19 @@
                 const shouldFaceLeft = direction === -1;
                 const isFacingCorrectDirection = (currentlyFacingLeft === shouldFaceLeft);
                 
-                // Calculate new position
-                const newPigeonX = gameState.pigeonX + (direction * pigeonSpeed);
+                // Check if pigeon is facing the correct direction
+                const currentlyFacingLeft = elements.pigeon.classList.contains('facing-left');
+                const shouldFaceLeft = direction === -1;
+                const isFacingCorrectDirection = (currentlyFacingLeft === shouldFaceLeft);
 
-                // Update position with boundaries
-                gameState.pigeonX = Math.max(0, Math.min(window.innerWidth - 120, newPigeonX));
+                // Only move if facing the correct direction
+                if (isFacingCorrectDirection) {
+                    // Calculate new position
+                    const newPigeonX = gameState.pigeonX + (direction * pigeonSpeed);
+                    
+                    // Update position with boundaries
+                    gameState.pigeonX = Math.max(0, Math.min(window.innerWidth - 120, newPigeonX));
+                }
 
                 // Add walking animation
                 if (!gameState.pigeonMoving) {
@@ -2045,7 +2053,16 @@
                     }
                 }
                 
-                if (nearestDistance < 50) {
+                // Adjust eating trigger based on facing direction
+                const isFacingLeft = elements.pigeon.classList.contains('facing-left');
+                let eatDistance = 50;
+
+                // When facing right, pigeon needs to be closer (head is on the right side)
+                if (!isFacingLeft && nearestKernel.x > gameState.pigeonX) {
+                    eatDistance = 80; // Trigger eating earlier when approaching from left
+                }
+
+                if (nearestDistance < eatDistance) {
                     eatKernel(nearestKernel);
                 }
             }
