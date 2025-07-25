@@ -1104,7 +1104,6 @@
             <div class="score-display">
                 <div>You: <span id="finalPlayerScore">0</span></div>
                 <div>Pigeon: <span id="finalPigeonScore">0</span></div>
-                <div id="bestComboDisplay" style="color: #FFD700; font-size: 24px; margin-top: 10px;">Best Combo: x<span id="finalBestCombo">0</span></div>
             </div>
             <div id="resultMessage"></div>
             <div id="highScore"></div>
@@ -1164,7 +1163,6 @@
             pendingFallenKernels: [],
             lastCooTime: 0,
             combo: 0,
-            bestCombo: 0,
             lastPopTime: 0,
             lastEatingAnimationTime: 0,
             lastDirectionChangeTime: 0,
@@ -1346,11 +1344,6 @@
                 if (gameState.combo >= 2) {
                     elements.comboDisplay.style.display = 'block';
                     elements.comboCount.textContent = gameState.combo;
-                    
-                    // Track best combo
-                    if (!gameState.bestCombo || gameState.combo > gameState.bestCombo) {
-                        gameState.bestCombo = gameState.combo;
-                    }
                     
                     // Clear previous timeout
                     if (gameState.comboTimeout) {
@@ -1966,7 +1959,6 @@
             gameState.speedMultiplier = 1 + (gameState.round - 1) * 0.1;
             gameState.pendingFallenKernels = [];
             gameState.combo = 0;
-            gameState.bestCombo = 0;
             gameState.lastPopTime = 0;
             
             // Reset power-ups
@@ -2281,15 +2273,6 @@
             // Update game over screen
             document.getElementById('finalPlayerScore').textContent = gameState.playerScore;
             document.getElementById('finalPigeonScore').textContent = gameState.pigeonScore;
-
-            // Show best combo if any combo was achieved
-            const bestComboDisplay = document.getElementById('bestComboDisplay');
-            if (gameState.bestCombo > 1) {
-                bestComboDisplay.style.display = 'block';
-                document.getElementById('finalBestCombo').textContent = gameState.bestCombo;
-            } else {
-                bestComboDisplay.style.display = 'none';
-            }
             
             const title = document.getElementById('gameOverTitle');
             const message = document.getElementById('resultMessage');
