@@ -2005,25 +2005,11 @@
                 const shouldFaceLeft = direction === -1;
                 const isFacingCorrectDirection = (currentlyFacingLeft === shouldFaceLeft);
                 
-                // Only move if facing the correct direction OR if we can change direction
-                if (isFacingCorrectDirection) {
-                    // Already facing correct direction, just move
-                    const newPigeonX = gameState.pigeonX + (direction * pigeonSpeed);
-                    
-                    // Update position with boundaries
-                    gameState.pigeonX = Math.max(0, Math.min(window.innerWidth - 120, newPigeonX));
-                } else {
-                    // Need to change direction first
-                    const currentTime = Date.now();
-                    const timeSinceLastChange = currentTime - gameState.lastDirectionChangeTime;
-                    
-                    if (timeSinceLastChange > 500) {
-                        // Can change direction now, but don't move yet
-                        // Direction change will happen in the sprite management section below
-                        // Next frame, pigeon will move
-                    }
-                    // If still in cooldown, pigeon stays still this frame
-                }
+                // Calculate new position
+                const newPigeonX = gameState.pigeonX + (direction * pigeonSpeed);
+
+                // Update position with boundaries
+                gameState.pigeonX = Math.max(0, Math.min(window.innerWidth - 120, newPigeonX));
 
                 // Add walking animation
                 if (!gameState.pigeonMoving) {
@@ -2100,10 +2086,6 @@
             // Set eating animation based on current facing direction
             elements.pigeon.className = isFacingLeft ? 'facing-left eating-left' : 'eating-right';
 
-            // Temporarily adjust visual position for eating animation
-            const headOffset = isFacingLeft ? -25 : 25;
-            elements.pigeon.style.transform = `translateX(${headOffset}px)`;
-            
             // Remove eating animation after delay
             setTimeout(() => {
                 if (isFacingLeft) {
@@ -2111,8 +2093,6 @@
                 } else {
                     elements.pigeon.className = '';
                 }
-                // Reset visual position
-                elements.pigeon.style.transform = '';
                 gameState.pigeonMoving = false;
             }, 300);
             
