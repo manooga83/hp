@@ -699,7 +699,7 @@
         /* Settings Button */
         #settingsButton {
             position: fixed;
-            top: 140px;
+            top: 200px;
             left: 20px;
             width: 50px;
             height: 50px;
@@ -885,10 +885,10 @@
         @media (max-width: 600px) {
             /* Bigger kernels for easier tapping */
             .kernel {
-                width: 20px !important;
-                height: 20px !important;
-                min-width: 20px;
-                min-height: 20px;
+                width: 25px !important;
+                height: 25px !important;
+                min-width: 25px;
+                min-height: 25px;
             }
             
             /* Larger text for readability */
@@ -1110,7 +1110,7 @@
             baseSpeed: 3,
             speedMultiplier: 1,
             pigeonX: window.innerWidth / 2,
-            pigeonSpeed: 7.5,
+            pigeonSpeed: 5,
             pigeonFacingRight: true,
             pigeonMoving: false,
             pendingFallenKernels: [],
@@ -1813,7 +1813,12 @@
             
             let count = 3;
             const countdownEl = document.getElementById('countdownNumber');
+            const countdownPigeon = document.getElementById('countdownPigeon');
             countdownEl.textContent = count;
+
+            // Ensure pigeon image is visible
+            countdownPigeon.style.display = 'block';
+            countdownPigeon.style.backgroundImage = "url('assets/images/pigeon/Pigeon_Hit.png')";
             
             playSound('startSound');
             
