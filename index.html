@@ -1594,18 +1594,25 @@
                 // Ensure kernel stays within screen bounds
                 const boundedFinalX = Math.max(10, Math.min(window.innerWidth - 30, finalX));
 
-                // Create a natural parabolic bounce using translateX and translateY together
-                this.element.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-                this.element.style.transform = `translateX(${boundedFinalX - this.x}px) translateY(0) scale(0.5)`;
-
-                // Simulate the arc by animating through keyframes
+                // Create natural double-bounce effect
                 let progress = 0;
                 const animateBounce = () => {
-                    progress += 0.05;
+                    progress += 0.04; // Slightly slower for smoother animation
                     if (progress <= 1) {
-                        // Parabolic equation for natural bounce
                         const currentX = (boundedFinalX - this.x) * progress;
-                        const currentY = -bounceHeight * Math.sin(progress * Math.PI);
+                        let currentY = 0;
+                        
+                        // Double bounce: first bounce at 0-0.5, second at 0.5-1
+                        if (progress <= 0.5) {
+                            // First bounce (higher)
+                            const bounceProgress = progress * 2; // 0 to 1 for first half
+                            currentY = -15 * Math.sin(bounceProgress * Math.PI); // Max 15px height
+                        } else {
+                            // Second bounce (70% smaller = 30% of original)
+                            const bounceProgress = (progress - 0.5) * 2; // 0 to 1 for second half
+                            currentY = -4.5 * Math.sin(bounceProgress * Math.PI); // Max 4.5px height (30% of 15)
+                        }
+                        
                         const currentScale = 1 - (progress * 0.5); // From 1 to 0.5
                         
                         this.element.style.transition = 'none';
@@ -1619,6 +1626,8 @@
                     }
                 };
 
+                // Start the animation
+                this.element.style.transition = 'none';
                 requestAnimationFrame(animateBounce);
 
                 // Gradually shrink kernel to 50% when on ground
