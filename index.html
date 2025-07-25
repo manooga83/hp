@@ -2013,9 +2013,11 @@
                     // Only allow direction change after 500ms cooldown
                     if (timeSinceLastChange > 500) {
                         if (direction === -1 && !elements.pigeon.classList.contains('facing-left')) {
+                            // Moving left, should face left
                             elements.pigeon.className = 'facing-left walking';
                             gameState.lastDirectionChangeTime = currentTime;
                         } else if (direction === 1 && elements.pigeon.classList.contains('facing-left')) {
+                            // Moving right, should face right (remove facing-left)
                             elements.pigeon.className = 'walking';
                             gameState.lastDirectionChangeTime = currentTime;
                         }
@@ -2059,8 +2061,8 @@
             
             // FIX 3: Better eating animation
             const isFacingLeft = elements.pigeon.classList.contains('facing-left');
-            
-            // Set eating animation
+
+            // Set eating animation based on current facing direction
             elements.pigeon.className = isFacingLeft ? 'facing-left eating-left' : 'eating-right';
             
             // Remove eating animation after delay
