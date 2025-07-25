@@ -2323,7 +2323,8 @@
                 document.getElementById('continueButton').style.display = 'inline-block';
                 document.getElementById('watchAdButton').style.display = 'none';
                 
-                // Don't reset round yet - wait for player choice
+                // Store current round before potential reset
+                gameState.savedRound = gameState.round;
             }
             
             if (isNewHighScore) {
@@ -2408,6 +2409,11 @@
         function continueRound() {
             // Show ad placeholder
             alert('Ad integration placeholder - In production, this would show an ad');
+            
+            // Restore the saved round
+            if (gameState.savedRound) {
+                gameState.round = gameState.savedRound;
+            }
             
             // After "watching ad", continue at same round
             elements.gameOverScreen.classList.add('hidden');
