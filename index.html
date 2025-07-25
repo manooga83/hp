@@ -2061,11 +2061,11 @@
                 
                 // Adjust eating distance based on direction pigeon is facing
                 const isFacingLeft = elements.pigeon.classList.contains('facing-left');
-                const eatingOffset = isFacingLeft ? -30 : 30; // Offset for head position
+                const eatingOffset = isFacingLeft ? 40 : -40; // Offset for head position
                 const adjustedPigeonX = gameState.pigeonX + eatingOffset;
                 const adjustedDistance = Math.abs(nearestKernel.x - adjustedPigeonX);
 
-                if (adjustedDistance < 30) {
+                if (adjustedDistance < 20) {
                     eatKernel(nearestKernel);
                 }
             }
