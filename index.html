@@ -2000,11 +2000,30 @@
             if (nearestKernel) {
                 const direction = nearestKernel.x > gameState.pigeonX ? 1 : -1;
                 
-                // Calculate new position
-                const newPigeonX = gameState.pigeonX + (direction * pigeonSpeed);
+                // Check if pigeon is facing the correct direction
+                const currentlyFacingLeft = elements.pigeon.classList.contains('facing-left');
+                const shouldFaceLeft = direction === -1;
+                const isFacingCorrectDirection = (currentlyFacingLeft === shouldFaceLeft);
                 
-                // Update position with boundaries
-                gameState.pigeonX = Math.max(0, Math.min(window.innerWidth - 120, newPigeonX));
+                // Only move if facing the correct direction OR if we can change direction
+                if (isFacingCorrectDirection) {
+                    // Already facing correct direction, just move
+                    const newPigeonX = gameState.pigeonX + (direction * pigeonSpeed);
+                    
+                    // Update position with boundaries
+                    gameState.pigeonX = Math.max(0, Math.min(window.innerWidth - 120, newPigeonX));
+                } else {
+                    // Need to change direction first
+                    const currentTime = Date.now();
+                    const timeSinceLastChange = currentTime - gameState.lastDirectionChangeTime;
+                    
+                    if (timeSinceLastChange > 500) {
+                        // Can change direction now, but don't move yet
+                        // Direction change will happen in the sprite management section below
+                        // Next frame, pigeon will move
+                    }
+                    // If still in cooldown, pigeon stays still this frame
+                }
 
                 // Add walking animation
                 if (!gameState.pigeonMoving) {
