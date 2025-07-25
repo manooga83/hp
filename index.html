@@ -1107,10 +1107,10 @@
             kernels: [],
             fallenKernels: [],
             highScore: 0,
-            baseSpeed: 2,
+            baseSpeed: 3,
             speedMultiplier: 1,
             pigeonX: window.innerWidth / 2,
-            pigeonSpeed: 5,
+            pigeonSpeed: 7.5,
             pigeonFacingRight: true,
             pigeonMoving: false,
             pendingFallenKernels: [],
@@ -1890,7 +1890,7 @@
             // Start game loop
             gameInterval = setInterval(gameLoop, 1000 / 60);
             // Decrease spawn interval by 10% each round (more kernels = shorter interval)
-            const spawnDelay = Math.max(300, 800 / (1 + (gameState.round - 1) * 0.1));
+            const spawnDelay = Math.max(150, 400 / (1 + (gameState.round - 1) * 0.1));
             spawnInterval = setInterval(spawnKernel, spawnDelay);
             
             // Start timer
