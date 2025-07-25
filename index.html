@@ -2330,6 +2330,8 @@
                 // Show continue button when pigeon wins
                 document.getElementById('continueButton').style.display = 'inline-block';
                 document.getElementById('watchAdButton').style.display = 'none';
+                
+                // DON'T reset the round here - let playAgain() handle it
             }
             
             if (isNewHighScore) {
@@ -2349,6 +2351,7 @@
             // Handle round progression based on button text
             if (document.getElementById('playAgainButton').textContent === 'TRY AGAIN') {
                 gameState.round = 1;
+                gameState.savedRound = null; // Clear saved round when restarting
             } else if (document.getElementById('playAgainButton').textContent === 'NEXT ROUND') {
                 gameState.round++;
             }
