@@ -1997,30 +1997,16 @@
                 const shouldFaceLeft = direction === -1;
                 const isFacingCorrectDirection = (currentlyFacingLeft === shouldFaceLeft);
                 
-                // Only move if facing the correct direction OR if we can change direction
-                if (isFacingCorrectDirection) {
-                    // Already facing correct direction, just move
-                    const newPigeonX = gameState.pigeonX + (direction * pigeonSpeed);
-                    
-                    // Check boundaries
-                    if (direction === 1 && newPigeonX > window.innerWidth - 120) {
-                        gameState.pigeonX = window.innerWidth - 120;
-                    } else if (direction === -1 && newPigeonX < 0) {
-                        gameState.pigeonX = 0;
-                    } else {
-                        gameState.pigeonX = newPigeonX;
-                    }
+                // FIX 3: Direct movement and sprite management
+                const newPigeonX = gameState.pigeonX + (direction * pigeonSpeed);
+
+                // Always update position but respect boundaries
+                if (direction === 1 && newPigeonX > window.innerWidth - 120) {
+                    gameState.pigeonX = window.innerWidth - 120;
+                } else if (direction === -1 && newPigeonX < 0) {
+                    gameState.pigeonX = 0;
                 } else {
-                    // Need to change direction first
-                    const currentTime = Date.now();
-                    const timeSinceLastChange = currentTime - gameState.lastDirectionChangeTime;
-                    
-                    if (timeSinceLastChange > 500) {
-                        // Can change direction now, but don't move yet
-                        // Direction change will happen in the sprite management section below
-                        // Next frame, pigeon will move
-                    }
-                    // If still in cooldown, pigeon stays still this frame
+                    gameState.pigeonX = newPigeonX;
                 }
 
                 // Add walking animation
@@ -2057,7 +2043,7 @@
                     }
                 }
                 
-                if (nearestDistance < 30) {
+                if (nearestDistance < 50) {
                     eatKernel(nearestKernel);
                 }
             }
