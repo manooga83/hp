@@ -2317,6 +2317,9 @@
                 document.getElementById('continueButton').style.display = 'none';
                 document.getElementById('watchAdButton').style.display = 'inline-block';
             } else {
+                // Store current round FIRST, before any potential reset
+                gameState.savedRound = gameState.round;
+                
                 title.textContent = 'The Pigeon Wins!';
                 message.innerHTML = '';
                 resultPigeon.style.backgroundImage = "url('assets/images/pigeon/Pigeon_Win.gif')";
@@ -2327,9 +2330,6 @@
                 // Show continue button when pigeon wins
                 document.getElementById('continueButton').style.display = 'inline-block';
                 document.getElementById('watchAdButton').style.display = 'none';
-                
-                // Store current round before potential reset
-                gameState.savedRound = gameState.round;
             }
             
             if (isNewHighScore) {
