@@ -375,7 +375,6 @@
             left: 0;
             width: 100%;
             height: 80px;
-            z-index: 5;
             background: linear-gradient(to bottom, #8B7355 0%, #6B5637 100%);
             border-top: 3px solid #5C4A3A;
         }
@@ -1559,7 +1558,7 @@
                 this.element.style.top = this.y + 'px';
                 
                 // Update shadow size based on distance from ground
-                const groundY = window.innerHeight - 80 - 30;
+                const groundY = window.innerHeight - 160 - 30;
                 const distanceRatio = Math.min(1, this.y / groundY);
                 const shadowScale = 0.5 + distanceRatio * 0.5;
                 const shadowOpacity = 0.3 * (1 - distanceRatio * 0.5);
@@ -1583,7 +1582,7 @@
                 this.element.style.animation = 'none'; // Stop rotation
                 
                 // Create dust cloud effect
-                createDustCloud(this.x + 15, window.innerHeight - 80);
+                createDustCloud(this.x + 15, window.innerHeight - 160);
                 
                 // If pigeon is frozen, make kernels disappear instead of staying on ground
                 if (gameState.activePowerUps.freeze) {
