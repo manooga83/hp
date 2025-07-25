@@ -59,11 +59,42 @@
 
         /* Splash Screen Background */
         #splashScreen {
-            background-image: url('assets/images/backgrounds/splash_screen_portrait.png');
+            background-image: url('assets/images/backgrounds/splash_background.jpg');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
             background-color: #87CEEB;
+            position: relative;
+        }
+
+        /* Top image overlay */
+        #splashScreen::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 100px;
+            background-image: url('assets/images/backgrounds/splash_top_logo.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        /* Bottom image overlay */
+        #splashScreen::after {
+            content: '';
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 250px;
+            height: 80px;
+            background-image: url('assets/images/backgrounds/splash_bottom_pigeon.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
         }
 
         /* Game UI */
