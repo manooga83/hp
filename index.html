@@ -1907,6 +1907,12 @@
             // Play background music and machine sound
             playMusic('backgroundMusic');
             playSound('machineSound');
+
+            // Restore funnel animation
+            const funnel = document.getElementById('kernelDispenser');
+            if (funnel) {
+                funnel.style.backgroundImage = "url('assets/images/ui/Kettle_Animated.gif')";
+            }
             
             // Clean up any remaining elements
             document.querySelectorAll('.kernel, .popcorn-pop, .popcorn-collect, .score-popup, .dust-cloud').forEach(el => el.remove());
