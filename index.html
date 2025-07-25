@@ -1559,7 +1559,7 @@
                 this.element.style.top = this.y + 'px';
                 
                 // Calculate ground position
-                const groundY = window.innerHeight - 50 - 30;
+                const groundY = window.innerHeight - 48 - 30;
                 
                 if (this.y >= groundY) {
                     this.y = groundY;
@@ -1589,7 +1589,7 @@
                 this.element.style.transform = 'scale(0.5)';
                 
                 // Create dust cloud effect
-                createDustCloud(this.x + 15, window.innerHeight - 50);
+                createDustCloud(this.x + 15, window.innerHeight - 48);
                 
                 // If pigeon is frozen, make kernels disappear instead of staying on ground
                 if (gameState.activePowerUps.freeze) {
