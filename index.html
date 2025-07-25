@@ -2059,13 +2059,7 @@
                     }
                 }
                 
-                // Adjust eating distance based on direction pigeon is facing
-                const isFacingLeft = elements.pigeon.classList.contains('facing-left');
-                const eatingOffset = isFacingLeft ? 40 : -40; // Offset for head position
-                const adjustedPigeonX = gameState.pigeonX + eatingOffset;
-                const adjustedDistance = Math.abs(nearestKernel.x - adjustedPigeonX);
-
-                if (adjustedDistance < 20) {
+                if (nearestDistance < 50) {
                     eatKernel(nearestKernel);
                 }
             }
@@ -2105,6 +2099,10 @@
 
             // Set eating animation based on current facing direction
             elements.pigeon.className = isFacingLeft ? 'facing-left eating-left' : 'eating-right';
+
+            // Temporarily adjust visual position for eating animation
+            const headOffset = isFacingLeft ? -25 : 25;
+            elements.pigeon.style.transform = `translateX(${headOffset}px)`;
             
             // Remove eating animation after delay
             setTimeout(() => {
@@ -2113,6 +2111,8 @@
                 } else {
                     elements.pigeon.className = '';
                 }
+                // Reset visual position
+                elements.pigeon.style.transform = '';
                 gameState.pigeonMoving = false;
             }, 300);
             
