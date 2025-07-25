@@ -2302,7 +2302,7 @@
                 resultPigeon.style.backgroundImage = "url('assets/images/pigeon/Pigeon_Angry.png')";
                 playSound('pigeonLoseSound');
                 playAgainBtn.textContent = 'NEXT ROUND';
-                gameState.round++;
+                // Don't increment round here - do it in playAgain() instead
                 
                 // Award power-ups every 5 rounds
                 if (gameState.round % 5 === 1 && gameState.round > 1) {
@@ -2311,6 +2311,10 @@
                     gameState.powerUps.freeze += 1;
                     message.innerHTML = '<div style="font-size: 20px; color: #FFD700; margin-top: 10px;">🎁 Bonus Power-ups Earned!</div>';
                 }
+
+                // Hide continue button when player wins
+                document.getElementById('continueButton').style.display = 'none';
+                document.getElementById('watchAdButton').style.display = 'inline-block';
             } else {
                 title.textContent = 'The Pigeon Wins!';
                 message.innerHTML = '';
@@ -2341,9 +2345,11 @@
         }
 
         function playAgain() {
-            // Reset to round 1 if pigeon won and player chose "TRY AGAIN"
+            // Handle round progression based on button text
             if (document.getElementById('playAgainButton').textContent === 'TRY AGAIN') {
                 gameState.round = 1;
+            } else if (document.getElementById('playAgainButton').textContent === 'NEXT ROUND') {
+                gameState.round++;
             }
             elements.gameOverScreen.classList.add('hidden');
             showCountdown();
