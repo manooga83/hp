@@ -2000,13 +2000,13 @@
             if (nearestKernel) {
                 const direction = nearestKernel.x > gameState.pigeonX ? 1 : -1;
                 
-                // Check if pigeon is facing the correct direction
-                const currentlyFacingLeft = elements.pigeon.classList.contains('facing-left');
-                const shouldFaceLeft = direction === -1;
-                const isFacingCorrectDirection = (currentlyFacingLeft === shouldFaceLeft);
+                // Check if pigeon is facing the correct direction for movement
+                const facingLeft = elements.pigeon.classList.contains('facing-left');
+                const needsToFaceLeft = direction === -1;
+                const correctDirection = (facingLeft === needsToFaceLeft);
 
                 // Only move if facing the correct direction
-                if (isFacingCorrectDirection) {
+                if (correctDirection) {
                     // Calculate new position
                     const newPigeonX = gameState.pigeonX + (direction * pigeonSpeed);
                     
