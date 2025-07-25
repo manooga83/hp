@@ -1991,6 +1991,24 @@
             
             if (nearestKernel) {
                 const direction = nearestKernel.x > gameState.pigeonX ? 1 : -1;
+                
+                // Check if we need to change direction
+                const currentlyFacingLeft = elements.pigeon.classList.contains('facing-left');
+                const needsToFaceLeft = direction === -1;
+                const needsDirectionChange = currentlyFacingLeft !== needsToFaceLeft;
+                
+                // If we need to change direction, check cooldown
+                if (needsDirectionChange) {
+                    const currentTime = Date.now();
+                    const timeSinceLastChange = currentTime - gameState.lastDirectionChangeTime;
+                    
+                    if (timeSinceLastChange < 500) {
+                        // Still in cooldown, don't move
+                        return;
+                    }
+                }
+                
+                // Now we can move
                 gameState.pigeonX += direction * pigeonSpeed;
                 
                 // Add walking animation
