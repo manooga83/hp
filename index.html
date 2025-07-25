@@ -1605,17 +1605,21 @@
                 
                 // FIX 2: Only add to fallen kernels if NOT in slow motion
                 if (!gameState.activePowerUps.slowMotion) {
-                    gameState.fallenKernels.push({
+                    // Add a timestamp when kernel hits ground
+                    const fallenKernel = {
                         x: this.x,
                         element: this.element,
-                        kernel: this
-                    });
+                        kernel: this,
+                        landedAt: Date.now()
+                    };
+                    gameState.fallenKernels.push(fallenKernel);
                 } else {
                     // During slow motion, store kernels separately
                     gameState.pendingFallenKernels.push({
                         x: this.x,
                         element: this.element,
-                        kernel: this
+                        kernel: this,
+                        landedAt: Date.now()
                     });
                 }
             }
@@ -2055,7 +2059,11 @@
                 }
 
                 if (nearestDistance < eatDistance) {
-                    eatKernel(nearestKernel);
+                    // Only eat kernels that have been on ground for at least 300ms
+                    const now = Date.now();
+                    if (nearestKernel.landedAt && (now - nearestKernel.landedAt) > 300) {
+                        eatKernel(nearestKernel);
+                    }
                 }
             }
         }
