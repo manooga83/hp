@@ -2043,8 +2043,11 @@
                     const currentTime = Date.now();
                     const timeSinceLastChange = currentTime - gameState.lastDirectionChangeTime;
                     
-                    // Only allow direction change after 500ms cooldown
-                    if (timeSinceLastChange > 500) {
+                    // Allow immediate direction change if at screen boundary
+                    const isAtBoundary = (gameState.pigeonX <= 0) || (gameState.pigeonX >= window.innerWidth - 90);
+                    
+                    // Only allow direction change after 500ms cooldown (unless at boundary)
+                    if (timeSinceLastChange > 500 || isAtBoundary) {
                         if (direction === -1 && !elements.pigeon.classList.contains('facing-left')) {
                             // Moving left, should face left
                             elements.pigeon.className = 'facing-left walking';
