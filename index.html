@@ -1561,17 +1561,6 @@
                 // Calculate ground position (adjusted to match visual floor at 48)
                 const groundY = window.innerHeight - 48 - 30;
 
-                // Gradual size reduction starting at 100px from bottom
-                const shrinkStartY = window.innerHeight - 100;
-                if (this.y > shrinkStartY) {
-                    const shrinkProgress = (this.y - shrinkStartY) / (groundY - shrinkStartY);
-                    const scale = 1 - (shrinkProgress * 0.5); // From 1.0 to 0.5
-                    this.element.style.transform = `scale(${scale}) rotate(${this.y * 2}deg)`;
-                } else {
-                    // Keep rotation for kernels above shrink zone
-                    this.element.style.transform = `rotate(${this.y * 2}deg)`;
-                }
-                
                 if (this.y >= groundY) {
                     this.y = groundY;
                     this.element.style.top = this.y + 'px';
@@ -1591,9 +1580,12 @@
                 
                 this.onGround = true;
                 this.element.style.pointerEvents = 'none';
-                this.element.style.opacity = '0.8';
                 this.element.style.zIndex = '5';
-                this.element.style.animation = 'none'; // Stop rotation
+
+                // Stop rotation and shrink to 50% over 0.5 seconds
+                this.element.style.animation = 'none';
+                this.element.style.transition = 'transform 0.5s ease-out';
+                this.element.style.transform = 'scale(0.5)';
 
                 // Gradually shrink kernel to 50% when on ground
                 this.element.style.transition = 'transform 0.3s ease-out';
