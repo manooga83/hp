@@ -2424,9 +2424,13 @@
             console.log('Saved round:', gameState.savedRound);
             console.log('Current round before restore:', gameState.round);
             
-            // Restore the saved round
-            if (gameState.savedRound) {
+            // Restore the saved round - but make sure it exists and is valid
+            if (gameState.savedRound && gameState.savedRound > 0) {
                 gameState.round = gameState.savedRound;
+                // Don't clear savedRound here - let playAgain handle it
+            } else {
+                // Fallback: if no saved round, at least stay at current round
+                console.log('Warning: No saved round found, staying at current round');
             }
             
             console.log('Round after restore:', gameState.round);
