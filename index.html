@@ -142,14 +142,14 @@
         /* Popcorn Bucket Placeholder */
         #popcornBag {
             position: absolute;
-            bottom: 100px;
-            left: 20px;
+            bottom: 120px;
+            left: 10px;
             width: 120px;
             height: 120px;
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
-            z-index: 15;
+            z-index: 3;
             transition: transform 0.3s ease;
         }
 
@@ -1745,9 +1745,9 @@
         // Update popcorn bucket based on score
         function updatePopcornBucket() {
             const bucket = elements.popcornBag;
-            if (gameState.playerScore <= 10) {
+            if (gameState.playerScore <= 25) {
                 bucket.style.backgroundImage = "url('assets/images/popcorn/Popcorn_Bucket_1.png')";
-            } else if (gameState.playerScore <= 20) {
+            } else if (gameState.playerScore <= 50) {
                 bucket.style.backgroundImage = "url('assets/images/popcorn/Popcorn_Bucket_2.png')";
             } else {
                 bucket.style.backgroundImage = "url('assets/images/popcorn/Popcorn_Bucket_3.png')";
