@@ -1992,38 +1992,35 @@
             if (nearestKernel) {
                 const direction = nearestKernel.x > gameState.pigeonX ? 1 : -1;
                 
-                // Check if we need to change direction
+                // Check if pigeon is facing the correct direction
                 const currentlyFacingLeft = elements.pigeon.classList.contains('facing-left');
-                const needsToFaceLeft = direction === -1;
-                const needsDirectionChange = currentlyFacingLeft !== needsToFaceLeft;
+                const shouldFaceLeft = direction === -1;
+                const isFacingCorrectDirection = (currentlyFacingLeft === shouldFaceLeft);
                 
-                // If we need to change direction, check cooldown
-                if (needsDirectionChange) {
+                // Only move if facing the correct direction OR if we can change direction
+                if (isFacingCorrectDirection) {
+                    // Already facing correct direction, just move
+                    const newPigeonX = gameState.pigeonX + (direction * pigeonSpeed);
+                    
+                    // Check boundaries
+                    if (direction === 1 && newPigeonX > window.innerWidth - 120) {
+                        gameState.pigeonX = window.innerWidth - 120;
+                    } else if (direction === -1 && newPigeonX < 0) {
+                        gameState.pigeonX = 0;
+                    } else {
+                        gameState.pigeonX = newPigeonX;
+                    }
+                } else {
+                    // Need to change direction first
                     const currentTime = Date.now();
                     const timeSinceLastChange = currentTime - gameState.lastDirectionChangeTime;
                     
-                    // Allow immediate direction change if at screen boundary
-                    const isAtBoundary = (gameState.pigeonX <= 0) || (gameState.pigeonX >= window.innerWidth - 90);
-                    
-                    if (timeSinceLastChange < 500 && !isAtBoundary) {
-                        // Still in cooldown and not at boundary, don't move
-                        return;
+                    if (timeSinceLastChange > 500) {
+                        // Can change direction now, but don't move yet
+                        // Direction change will happen in the sprite management section below
+                        // Next frame, pigeon will move
                     }
-                }
-                
-                // Calculate new position
-                const newPigeonX = gameState.pigeonX + (direction * pigeonSpeed);
-
-                // Check boundaries and only prevent movement towards the boundary
-                if (direction === 1 && newPigeonX > window.innerWidth - 120) {
-                    // Moving right and would exceed right boundary
-                    gameState.pigeonX = window.innerWidth - 120;
-                } else if (direction === -1 && newPigeonX < 0) {
-                    // Moving left and would exceed left boundary
-                    gameState.pigeonX = 0;
-                } else {
-                    // Normal movement
-                    gameState.pigeonX = newPigeonX;
+                    // If still in cooldown, pigeon stays still this frame
                 }
 
                 // Add walking animation
