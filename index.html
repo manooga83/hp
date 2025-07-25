@@ -1110,6 +1110,7 @@
             <div id="highScore"></div>
             <div style="display: flex; gap: 15px; margin-top: 20px; justify-content: center; flex-wrap: wrap;">
                 <button class="btn" id="playAgainButton">PLAY AGAIN</button>
+                <button class="btn btn-secondary" id="continueButton" style="display: none;">WATCH AD TO CONTINUE</button>
                 <button class="btn btn-secondary" id="watchAdButton">WATCH AD FOR POWER-UPS</button>
             </div>
             <button class="share-button" onclick="shareScore()" style="margin-top: 15px;">
@@ -2317,7 +2318,12 @@
                 resultPigeon.classList.add('victory-dance');
                 playSound('pigeonWinSound');
                 playAgainBtn.textContent = 'TRY AGAIN';
-                gameState.round = 1;
+                
+                // Show continue button when pigeon wins
+                document.getElementById('continueButton').style.display = 'inline-block';
+                document.getElementById('watchAdButton').style.display = 'none';
+                
+                // Don't reset round yet - wait for player choice
             }
             
             if (isNewHighScore) {
@@ -2334,10 +2340,13 @@
         }
 
         function playAgain() {
+            // Reset to round 1 if pigeon won and player chose "TRY AGAIN"
+            if (document.getElementById('playAgainButton').textContent === 'TRY AGAIN') {
+                gameState.round = 1;
+            }
             elements.gameOverScreen.classList.add('hidden');
             showCountdown();
         }
-
         function showMenu() {
             if (gameState.highScore > 0) {
                 elements.menuHighScore.classList.remove('hidden');
@@ -2395,11 +2404,20 @@
         window.addEventListener('resize', () => {
             // Kernels will adapt on next spawn
         });
-
+        // Continue playing at same round after watching ad
+        function continueRound() {
+            // Show ad placeholder
+            alert('Ad integration placeholder - In production, this would show an ad');
+            
+            // After "watching ad", continue at same round
+            elements.gameOverScreen.classList.add('hidden');
+            showCountdown();
+        }
         // Event listeners
         document.getElementById('playButton').addEventListener('click', showCountdown);
         document.getElementById('playAgainButton').addEventListener('click', playAgain);
         document.getElementById('watchAdButton').addEventListener('click', watchAdForPowerUp);
+        document.getElementById('continueButton').addEventListener('click', continueRound);
     </script>
     <script>
     // Register Service Worker
