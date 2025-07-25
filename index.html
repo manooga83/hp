@@ -879,6 +879,48 @@
                 opacity: 0;
             }
         }
+        /* Mobile optimization - Added for better mobile experience */
+        @media (max-width: 600px) {
+            /* Bigger kernels for easier tapping */
+            .kernel {
+                width: 50px !important;
+                height: 50px !important;
+                min-width: 44px;
+                min-height: 44px;
+            }
+            
+            /* Larger text for readability */
+            #scoreBoard {
+                font-size: 18px;
+                padding: 12px 18px;
+            }
+            
+            /* Bigger buttons */
+            .btn {
+                padding: 20px 40px;
+                font-size: 22px;
+                min-height: 50px;
+            }
+            
+            /* Bigger pigeon for visibility */
+            #pigeon {
+                width: 100px;
+                height: 100px;
+            }
+            
+            /* Larger timer */
+            #timer {
+                font-size: 28px;
+                padding: 12px 18px;
+            }
+            
+            /* Adjust power-up icons */
+            .powerup-icon {
+                width: 70px;
+                height: 70px;
+                font-size: 35px;
+            }
+        }
     </style>
 </head>
 <body>
