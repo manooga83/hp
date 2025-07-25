@@ -1470,11 +1470,6 @@
                 this.element.style.backgroundImage = `url('${kernelImages[Math.floor(Math.random() * kernelImages.length)]}')`;
                 this.element.style.backgroundPosition = 'center';
                 
-                // Add shadow element
-                this.shadow = document.createElement('div');
-                this.shadow.className = 'kernel-shadow';
-                this.element.appendChild(this.shadow);
-                
                 this.onGround = false;
                 this.popped = false;
                 
@@ -1563,13 +1558,8 @@
                 this.element.style.left = this.x + 'px';
                 this.element.style.top = this.y + 'px';
                 
-                // Update shadow size based on distance from ground
-                const groundY = window.innerHeight - 65 - 30;
-                const distanceRatio = Math.min(1, this.y / groundY);
-                const shadowScale = 0.5 + distanceRatio * 0.5;
-                const shadowOpacity = 0.3 * (1 - distanceRatio * 0.5);
-                this.shadow.style.transform = `scale(${shadowScale})`;
-                this.shadow.style.opacity = shadowOpacity;
+                // Calculate ground position
+                const groundY = window.innerHeight - 120 - 30;
                 
                 if (this.y >= groundY) {
                     this.y = groundY;
@@ -1593,9 +1583,13 @@
                 this.element.style.opacity = '0.8';
                 this.element.style.zIndex = '5';
                 this.element.style.animation = 'none'; // Stop rotation
+
+                // Gradually shrink kernel to 50% when on ground
+                this.element.style.transition = 'transform 0.3s ease-out';
+                this.element.style.transform = 'scale(0.5)';
                 
                 // Create dust cloud effect
-                createDustCloud(this.x + 15, window.innerHeight - 65);
+                createDustCloud(this.x + 15, window.innerHeight - 75);
                 
                 // If pigeon is frozen, make kernels disappear instead of staying on ground
                 if (gameState.activePowerUps.freeze) {
