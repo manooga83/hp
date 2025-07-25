@@ -1585,25 +1585,31 @@
                 // Stop rotation
                 this.element.style.animation = 'none';
 
-                // Random bounce direction and distance
+                // Random bounce parameters
                 const bounceDirection = Math.random() < 0.5 ? -1 : 1;
                 const bounceDistance = 20 + Math.random() * 40; // 20-60 pixels
                 const bounceHeight = 30 + Math.random() * 20; // 30-50 pixels
                 const finalX = this.x + (bounceDirection * bounceDistance);
 
                 // Ensure kernel stays within screen bounds
-                this.x = Math.max(10, Math.min(window.innerWidth - 30, finalX));
+                const boundedFinalX = Math.max(10, Math.min(window.innerWidth - 30, finalX));
 
-                // Animate bounce and shrink
-                this.element.style.transition = 'all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                // First: Bounce up with initial shrink
+                this.element.style.transition = 'transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
                 this.element.style.transform = `translateY(-${bounceHeight}px) scale(0.7)`;
-                this.element.style.left = this.x + 'px';
 
-                // After bounce up, fall back down with final shrink
+                // Second: Move horizontally while in air
                 setTimeout(() => {
-                    this.element.style.transition = 'all 0.3s ease-in';
+                    this.element.style.transition = 'left 0.3s ease-out';
+                    this.element.style.left = boundedFinalX + 'px';
+                    this.x = boundedFinalX; // Update actual position
+                }, 100);
+
+                // Third: Fall back down with final shrink
+                setTimeout(() => {
+                    this.element.style.transition = 'transform 0.3s ease-in';
                     this.element.style.transform = 'translateY(0) scale(0.5)';
-                }, 200);
+                }, 300);
 
                 // Gradually shrink kernel to 50% when on ground
                 this.element.style.transition = 'transform 0.3s ease-out';
