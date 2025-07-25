@@ -1557,7 +1557,8 @@
                     this.x += Math.sin(this.y * this.swayFrequency) * this.swayAmplitude * 0.02;
                 }
                 
-                this.x = Math.max(0, Math.min(window.innerWidth - 40, this.x));
+                // Keep within bounds (with larger margin to prevent edge kernels)
+                this.x = Math.max(20, Math.min(window.innerWidth - 60, this.x));
                 
                 this.element.style.left = this.x + 'px';
                 this.element.style.top = this.y + 'px';
@@ -1580,6 +1581,13 @@
             }
             
             hitGround() {
+                // Check if kernel is outside playable bounds
+                if (this.x < 0 || this.x > window.innerWidth - 40) {
+                    // Remove kernels that land outside bounds
+                    this.remove();
+                    return;
+                }
+                
                 this.onGround = true;
                 this.element.style.pointerEvents = 'none';
                 this.element.style.opacity = '0.8';
@@ -1958,6 +1966,12 @@
             if (gameState.activePowerUps.freeze) return;
             // FIX 2: Don't update pigeon during slow motion
             if (gameState.activePowerUps.slowMotion) return;
+            
+            // Don't move if currently eating
+            if (elements.pigeon.classList.contains('eating-right') || 
+                elements.pigeon.classList.contains('eating-left')) {
+                return;
+            }
             
             const elapsedTime = 30 - gameState.timeLeft;
             let pigeonSpeed = gameState.pigeonSpeed;
