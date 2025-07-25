@@ -1566,7 +1566,10 @@
                 if (this.y > shrinkStartY) {
                     const shrinkProgress = (this.y - shrinkStartY) / (groundY - shrinkStartY);
                     const scale = 1 - (shrinkProgress * 0.5); // From 1.0 to 0.5
-                    this.element.style.transform = `scale(${scale})`;
+                    this.element.style.transform = `scale(${scale}) rotate(${this.y * 2}deg)`;
+                } else {
+                    // Keep rotation for kernels above shrink zone
+                    this.element.style.transform = `rotate(${this.y * 2}deg)`;
                 }
                 
                 if (this.y >= groundY) {
@@ -1592,6 +1595,10 @@
                 this.element.style.zIndex = '5';
                 this.element.style.animation = 'none'; // Stop rotation
 
+                // Gradually shrink kernel to 50% when on ground
+                this.element.style.transition = 'transform 0.3s ease-out';
+                this.element.style.transform = 'scale(0.5)';
+                
                 // Create dust cloud effect
                 createDustCloud(this.x + 15, window.innerHeight - 48);
                 
